@@ -1,10 +1,13 @@
 # Users, rights and groups
+
 resto provide a user authentication and authorization mechanism allowing to manage access to ressources in particular to authorize CRUD operations (Create, Read, Update, Delete) on collections, catalogs and items.
 
 ## Users
+
 On the first launch of resto, one user (admin) is created. This user is automatically added to the **admin group** (see chapter on groups below).
 
 ### Add a new user
+
 The following example shows how to add a new user. When adding a new user, it will be automatically associated with default rights (see chapter on rights below).
 
         # Add a new user
@@ -36,18 +39,20 @@ Notes :
 * The *activated* value set to 1. This means that the user is created and validated i.e. you can use authenticate with this user within resto. If you want to check for email address before allowing user to authenticate to resto, you have to set the **USER_AUTOVALIDATION** environment value to *false* in [config.env](./config.env). In this case, the user will receive an email including a validation link. The *activated* value will be set to 1 upon user's validation link resolution.
 
 ### Update user profile
+
 Updating user profile can be done either by administrator or by the user itself:
 
         # Update johndoe bio with John Doe credentials
         curl -X PUT -d@examples/users/johnDoe_update.json "http://johndoe:dummy@localhost:5252/users/johndoe"
 
 ### Get user profile
+
 First create another user Jane Doe:
 
         curl -X POST -d@examples/users/janeDoe.json "http://localhost:5252/users"
 
-User profiles can only be viewed by authenticated user 
-        
+User profiles can only be viewed by authenticated user
+
         # John Doe ask for Jane Doe profile 
         curl "http://johndoe:dummy@localhost:5252/users/janedoe"
 
@@ -59,6 +64,7 @@ User can get its own profile directly using the shorcut /me
 *Note: when requesting the profile of another user (e.g. John Doe requesting Jane Doe profile), only a limited set of the profile properties are returned. These properties are defined in the user settings*
 
 ### Get an authorization token (optional)
+
 To authenticate to resto endpoint, you can either provide the email/password of an existing user or an authentication token.
 
 You can generate a bearer authentication token valid for 100 days for the above user with the following command:
@@ -79,6 +85,7 @@ The token can be used to request authenticated endpoint, for instance to get the
         curl -H "Authorization: Bearer ${JOHN_DOE_BEARER}" "http://localhost:5252/me"
 
 ## Rights
+
 The rights defines access to resto ressources in particular to authorize CRUD operations (Create, Read, Update, Delete) on collections, catalogs and items.
 
 rights are defined as boolean properties within a JSON object. The default user's rights are the following:
@@ -117,6 +124,7 @@ rights are defined as boolean properties within a JSON object. The default user'
         }
 
 ### Get user rights
+
 To get the rights for John Doe:
 
         curl "http://johndoe:dummy@localhost:5252/users/johndoe/rights?_pretty=1"
@@ -140,7 +148,10 @@ The result should be :
                 }
         }
 
+!!! the key catalogs is not present
+
 ### Set user rights
+
 Only a user in the **admin group** (see chapter on groups below) can set the rights of a user.
 
         # Allow John Doe to create catalog under /catalogs/projects
@@ -153,6 +164,7 @@ The result should returns :
 Note that existing rights are not deleted when setting rights but are merged with input rights.
 
 ## Groups
+
 groups can be used to share rights among group members.
 
 On the first launch of resto, two groups are created :
@@ -163,6 +175,7 @@ On the first launch of resto, two groups are created :
 All users are automatically added to the default group
 
 ### Add a group
+
 Any user can add a group. Note that the group name must be unique.
 
         # Create dummy group
@@ -175,6 +188,7 @@ The result should be
 *Note: When a user create a group, the user is automaticaly added to this group (except if the user is an admin)*
 
 ### Set group rights
+
 Only a user in the **admin group** can set the rights for a group
 
         # Set rights for dummy group allowing members to createAnyItem
@@ -186,7 +200,10 @@ The result should returns :
 
 Note that existing rights are not deleted when setting rights but are merged with input rights.
 
+!!! The createAnyItem means any user in that group can create an item in any catalog/collection?
+
 ### Add user to a group
+
 Only a user in the **admin group** or the owner of the group can add user to a group
 
         # As the owner of group dummyGroup, JohnDoe can add JaneDoe in the group
@@ -214,6 +231,7 @@ Only a user in the **admin group** or the owner of the group can add user to a g
         }
 
 ### Remove user from a group
+
 Only a user in the **admin group** or the owner of the group can remove a user from a group
 
         # Remove John Doe from dummyGroup
@@ -242,8 +260,11 @@ Only a user in the **admin group** or the owner of the group can remove a user f
         }
 
 ## Ownership and visibility
+
 ### Ownership
+
 The following resources have an ownership i.e. they **belong to a user**:
+
 * item
 * catalog
 * collection
@@ -252,7 +273,9 @@ The following resources have an ownership i.e. they **belong to a user**:
 An owned resource can only be updated and deleted by its owner or by a user with a *Any* right (e.g. updateAnyCollection or deleteAnyCatalog). See the rights section for more detailed information.
 
 ### Visibility
+
 The following resources have a visibility status:
+
 * item
 * catalog
 * collection
@@ -262,6 +285,7 @@ The visibility property is an array of group names. For a given resource, only u
 Unless specified, every resource is visible by every user (i.e. its visibility property is set by default to an array containing the *default group*).
 
 #### Set up group and user to play with visibility
+
 First create John Doe user if not exist then create a group and add John Doe to this group:
 
         # John Doe register
@@ -277,6 +301,7 @@ First create John Doe user if not exist then create a group and add John Doe to 
         curl -X POST -d@examples/users/johnDoe_rights_collection.json "http://admin:admin@localhost:5252/users/johndoe/rights"
 
 #### Update an item to make it visible only to a group
+
 John Doe is in group dummyGroup and has right to create a collection:
 
         # John Doe Create collection
@@ -299,6 +324,7 @@ Now John Doe change the visibility of the item to dummyGroup only:
         curl "http://johndoe:dummy@localhost:5252/collections/JohnDoeCollection/items"
 
 #### Update a collection to make it visible only to a group
+
 John Doe change the visibility of the JohnDoeCollection to dummyGroup only:
 
         curl -X PUT -d@examples/collections/JohnDoeCollection_update.json "http://johndoe:dummy@localhost:5252/collections/JohnDoeCollection"
@@ -312,6 +338,7 @@ John Doe change the visibility of the JohnDoeCollection to dummyGroup only:
 *Note: The collection visibility can also be set during collection creation by adding the "visibility" property to the collection json description*
 
 #### Create a catalog to make it visible only to a group
+
 John Doe creates a catalog that is only visible by dummyGroup:
 
         curl -X POST -d@examples/catalogs/johnDoeCatalog.json "http://johndoe:dummy@localhost:5252/catalogs/users/johndoe"
@@ -323,11 +350,13 @@ John Doe creates a catalog that is only visible by dummyGroup:
         curl "http://johndoe:dummy@localhost:5252/catalogs/users/johndoe"
 
 #### Update a catalog to make it visible for everyone
+
 John Doe change visibility to default group so everyone can see it:
 
         curl -X PUT -d@examples/catalogs/johnDoeCatalog_update.json "http://johndoe:dummy@localhost:5252/catalogs/users/johndoe/JohnDoeCatalog"
 
 #### Allow user to create a catalog under another catalog it does not own
+
 John Doe has "createCatalog" right, so he can create a catalog under /catalogs/projects
 
         curl -X POST -d@examples/catalogs/johnDoeCatalog.json "http://johndoe:dummy@localhost:5252/catalogs/projects"
