@@ -607,11 +607,22 @@ class Auth extends RestoAddOn
         $groupsFunctions = new GroupsFunctions($this->context->dbDriver);
         $userGroups = $groupsFunctions->getGroups(array('userid' => $user->profile['id']));
         $userGroupNames = array_map(function ($g) { return $g['name']; }, $userGroups);
+
         $inputGroups = $profile['groups'];
 
+        $groupsInDB = $groupsFunctions->getGroups();
+        $groupNamesInDB = array_map(fn ($value) => $value['name'], $groupsInDB);
         // Add user to groups in inputGroups not already associated
         foreach ($inputGroups as $groupName) {
             if (!in_array($groupName, $userGroupNames)) {
+                if (!in_array($groupName, $groupNamesInDB)) {
+                    $groupsFunctions->createGroup(array(
+                      "name" => $groupName,
+                      "owner" => $user->profile['id'],
+                      "private" => 0,
+                      "description" => "Created automaticaly during " . $user->profile['username'] . " login",
+                    ));
+                }
                 $group = $groupsFunctions->getGroup($groupName);
                 if (isset($group['id'])) {
                     $groupsFunctions->addUserToGroup(array('id' => $group['id']), $user->profile['id'], true);
@@ -958,4 +969,3 @@ class Auth extends RestoAddOn
     }
 
 }
-
