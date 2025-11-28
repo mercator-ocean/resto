@@ -274,6 +274,9 @@ class GroupAPI
             RestoLogUtil::httpError(403, 'You are not allowed to set property "owner"');
         } 
         
+        if (isset($this->user->profile['externalidp'])) {
+            RestoLogUtil::httpError(403, 'You are not allowed to create a group when connecting through external identity provider, ask an administrator');
+        }
         // Force owner to POSTING user
         $body['owner'] = $body['owner'] ?? $this->user->profile['id'];
         $body['private'] = 0;
