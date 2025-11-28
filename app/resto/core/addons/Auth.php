@@ -220,6 +220,7 @@ class Auth extends RestoAddOn
      */
     public function authenticateWithToken($params, $data = array())
     {
+        error_log("Authenticate with token addon");
 
         // Authentication issuer is mandatory
         if (!isset($params) || !isset($params['issuerId'])) {
@@ -501,6 +502,7 @@ class Auth extends RestoAddOn
     private function getProvider($issuerId)
     {
 
+        error_log("Get provider by issuer");
         /*
          * Get providers from input ADDON_AUTH_PROVIDERS
          */
@@ -541,6 +543,7 @@ class Auth extends RestoAddOn
      */
     private function tokenAndProfile($profile, $provider)
     {
+        error_log("Get tokenAndProfile");
         if (isset($profile['email'])) {
             try {
                 $user = new RestoUser(array('email' => strtolower($profile['email'])), $this->context, true);
@@ -848,6 +851,7 @@ class Auth extends RestoAddOn
      */
     private function getProviders($str)
     {
+        error_log("Get provider");
         $providers = array();
 
         if (!isset($str)) {

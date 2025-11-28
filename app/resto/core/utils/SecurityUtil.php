@@ -73,12 +73,14 @@ class SecurityUtil
          */
         if (isset($context->query['_bearer'])) {
             $authRequested = true;
+            error_log("With bearer");
             $user = $this->authenticateBearer($context, $context->query['_bearer']);
         //unset($context->query['_bearer']);
         }
         /*
          * ...or from headers
          */ else {
+            error_log("From headers");
             list($authRequested, $user) = $this->headersAuthenticate($context);
         }
 
@@ -93,6 +95,7 @@ class SecurityUtil
          * Authentication headers were present but authentication leads to unauthentified user => security error
          */
         if ($authRequested && !isset($user->profile['id'])) {
+            error_log('HELLO' . implode(", ", $user->profile));
             RestoLogUtil::httpError(401);
         }
 
@@ -110,6 +113,7 @@ class SecurityUtil
         $httpAuth = filter_input(INPUT_SERVER, 'HTTP_AUTHORIZATION', FILTER_UNSAFE_RAW);
         $rhttpAuth = filter_input(INPUT_SERVER, 'REDIRECT_HTTP_AUTHORIZATION', FILTER_UNSAFE_RAW);
         $authorization = !empty($httpAuth) ? $httpAuth : (!empty($rhttpAuth) ? $rhttpAuth : null);
+        error_log('On est autorisé');
         if (isset($authorization)) {
             list($method, $token) = explode(' ', $authorization, 2);
             switch ($method) {
@@ -172,14 +176,18 @@ class SecurityUtil
     {
         $user = null;
 
+        error_log('authenticateBearer');
         try {
             /*
              * If issuer_id is specified in the request then assumes a third party token.
              * In this case, transform this third party token into a resto token
              */
             $authClassName = 'Auth';
+            error_log("IsSet" . isset($context->addons[$authClassName]));
+            error_log("IsSet" . isset($context->query["issuerId"]));
             if (isset($context->query['issuerId']) && isset($context->addons[$authClassName])) {
                 $auth = new $authClassName($context, null);
+                error_log("On appelle l'addon");
                 $token = $auth->getProfileToken($context->query['issuerId'], $token);
             }
 
@@ -192,6 +200,7 @@ class SecurityUtil
                 $user->token = $token;
             }
         } catch (Exception $ex) {
+            error_log("Ça plante");
             return $user;
         }
         
