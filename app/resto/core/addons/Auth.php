@@ -632,7 +632,7 @@ class Auth extends RestoAddOn
 
         // Remove user from groups not in inputGroups
         foreach ($userGroups as $group) {
-            if (!in_array($group['name'], $inputGroups)) {
+            if ($group['private'] === 0 && !in_array($group['name'], $inputGroups)) {
                 $groupsFunctions->removeUserFromGroup(array('id' => $group['id']), $user->profile['id'], true);
             }
         }
