@@ -11,5 +11,7 @@ services:
       - ./app/vendor:/app/vendor:ro
       - ./build/resto/container_root/cont-init.d/:/etc/cont-init.d/:ro
   restodb:
+    ports:
+      - 5432:5432
     volumes:
       - ./postgresql-conf/postgresql-dev.conf:/etc/postgresql.conf

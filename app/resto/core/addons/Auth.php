@@ -610,11 +610,11 @@ class Auth extends RestoAddOn
 
         $inputGroups = $profile['groups'];
 
-        $groupsInDB = $groupsFunctions->getGroups();
+        $groupsInDB = $groupsFunctions->getGroups(array('exclude_user_groups' => true));
         $groupNamesInDB = array_map(fn ($value) => $value['name'], $groupsInDB);
         // Add user to groups in inputGroups not already associated
         foreach ($inputGroups as $groupName) {
-            if (!in_array($groupName, $userGroupNames)) {
+            if (($this->options['ignoreUppercaseGroups'] == false || !preg_match('/[A-Z]/', $groupName)) && !in_array($groupName, $userGroupNames)) {
                 if (!in_array($groupName, $groupNamesInDB)) {
                     $groupsFunctions->createGroup(array(
                       "name" => $groupName,
@@ -630,9 +630,10 @@ class Auth extends RestoAddOn
             }
         }
 
+        $internalGroups = array("admin", "default");
         // Remove user from groups not in inputGroups
         foreach ($userGroups as $group) {
-            if ($group['private'] === 0 && !in_array($group['name'], $inputGroups)) {
+            if ($group['private'] === 0 && !in_array($group['name'], $inputGroups) && !in_array($group['name'], $internalGroups) {
                 $groupsFunctions->removeUserFromGroup(array('id' => $group['id']), $user->profile['id'], true);
             }
         }

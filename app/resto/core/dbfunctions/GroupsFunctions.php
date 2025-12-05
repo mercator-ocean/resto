@@ -46,7 +46,10 @@ class GroupsFunctions
             /*'private <> 1',
             'name NOT IN (\'admin\', \'default\')'*/
         );
-        
+        if (isset($params['exclude_user_groups'])) {
+            $where[] = "right('name', " . strlen(RestoUser::USER_GROUP_SUFFIX) . ") != '" . $this->dbDriver->escape_string(RestoUser::USER_GROUP_SUFFIX) . "'";
+        }
+
         // Return group by id
         if (isset($params['id'])) {
             $where[] = 'id=' . $this->dbDriver->escape_string( $params['id']);
