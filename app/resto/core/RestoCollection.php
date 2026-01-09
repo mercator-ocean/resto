@@ -506,17 +506,17 @@ class RestoCollection
     /*
      * Collection identifier must be unique
      */
-    public $id =  null;
+    public $id = null;
 
     /*
      * Collection title
      */
-    public $title =  null;
+    public $title = null;
 
     /*
      * Collection description
      */
-    public $description =  null;
+    public $description = null;
 
     /*
      * Data model for this collection
@@ -576,7 +576,7 @@ class RestoCollection
      * Summaries
      */
     private $summaries = null;
-    
+
     /**
      * @OA\Schema(
      *      schema="Provider",
@@ -670,13 +670,13 @@ class RestoCollection
     public function load()
     {
 
-        if ( !$this->isLoaded ) {
+        if (!$this->isLoaded) {
             $this->isLoaded = true;
             $collectionObject = (new CollectionsFunctions($this->context->dbDriver))->getCollection($this->id, $this->user);
-            if (! isset($collectionObject)) {
+            if (!isset($collectionObject)) {
                 RestoLogUtil::httpError(404);
             }
-    
+
             foreach ($collectionObject as $key => $value) {
                 $this->$key = $key === 'model' ? new $value(array(
                     'collectionId' => $this->id,
@@ -685,7 +685,7 @@ class RestoCollection
             }
 
         }
-        
+
         return $this;
     }
 
@@ -708,7 +708,7 @@ class RestoCollection
     public function update($object)
     {
         // It means that collection is not loaded - so cannot be updated
-        if (! isset($this->model)) {
+        if (!isset($this->model)) {
             RestoLogUtil::httpError(400, 'Model does not exist');
         }
 
@@ -743,12 +743,11 @@ class RestoCollection
      */
     public function getSummaries()
     {
-        if ( !isset($this->summaries) ) {
+        if (!isset($this->summaries)) {
             $summaries = (new CatalogsFunctions($this->context->dbDriver))->getSummaries(null);
-            if ( isset($summaries[$this->id]) ) {
+            if (isset($summaries[$this->id])) {
                 $this->setSummaries($summaries[$this->id]);
-            }
-            else {
+            } else {
                 $this->summaries = array();
             }
         }
@@ -763,7 +762,7 @@ class RestoCollection
 
         $this->summaries = array();
 
-        if ( isset($this->extent['temporal']['interval'][0][0]) && isset($this->extent['temporal']['interval'][0][1]) ) {
+        if (isset($this->extent['temporal']['interval'][0][0]) && isset($this->extent['temporal']['interval'][0][1])) {
             $this->summaries['datetime'] = array(
                 'minimum' => $this->extent['temporal']['interval'][0][0],
                 'maximum' => $this->extent['temporal']['interval'][0][1]
@@ -771,7 +770,7 @@ class RestoCollection
         }
 
         // [STAC] Change the key name if needed (e.g. "instrument" => "instruments")
-        foreach(array_keys($summaries) as $key) {
+        foreach (array_keys($summaries) as $key) {
             $this->summaries[isset($this->model->stacMapping[$key]) ? $this->model->stacMapping[$key]['key'] : $key] = $summaries[$key];
         }
 
@@ -782,7 +781,7 @@ class RestoCollection
                 'maximum' => 100
             );
         }
-        
+
     }
 
     /**
@@ -833,7 +832,7 @@ class RestoCollection
                 'model' => $this->model->getName(),
                 'lineage' => $this->model->getLineage(),
                 'owner' => $this->owner/*,
-                'visibility' => $this->visibility*/
+'visibility' => $this->visibility*/
             )
         );
 
@@ -842,7 +841,7 @@ class RestoCollection
                 $collectionArray[$key] = $key === 'assets' ? (object) $this->$key : $this->$key;
             }
         }
-        
+
         $summaries = $this->getSummaries();
 
         // Properties
@@ -859,12 +858,12 @@ class RestoCollection
         }
 
         // Force summaries to be an object not an array during json_encode
-        if ( !empty($summaries) ) {
+        if (!empty($summaries)) {
             $collectionArray['summaries'] = $summaries;
         }
 
         return $this->context->core['useJSONLD'] ? JSONLDUtil::addDataCatalogMetadata($collectionArray) : $collectionArray;
-        
+
     }
 
     /**
@@ -900,23 +899,23 @@ class RestoCollection
     {
 
         $cleanObject = $this->cleanJSON($object, $modelName);
-        
+
         /*
          * Check mandatory properties are required
          */
         $this->checkCreationMandatoryProperties($cleanObject);
-        
+
         /*
          * Set collection model
          */
-        if ( !isset($cleanObject['model']) ) {
+        if (!isset($cleanObject['model'])) {
             $cleanObject['model'] = $this->context->core['defaultModel'];
         }
         $this->model = new $cleanObject['model'](array(
             'collectionId' => $this->id,
             'addons' => $this->context->addons
         ));
-        
+
         /*
          * Collection owner is the current user
          */
@@ -926,13 +925,13 @@ class RestoCollection
          * Set values
          */
         foreach ($cleanObject as $key => $value) {
-            if ( !in_array($key, array('model', 'owner')) ) {
+            if (!in_array($key, array('model', 'owner'))) {
                 $this->$key = $value;
             }
         }
 
         $this->isLoaded = true;
-        
+
         return $this;
     }
 
@@ -943,7 +942,7 @@ class RestoCollection
      * @param string $modelName
      * @return array
      */
-    private function cleanJSON($object, $modelName = null)
+    private function cleanJSON($object, $modelName = null): array
     {
 
         $clean = array();
@@ -958,14 +957,14 @@ class RestoCollection
         /*
          * Set DefaultModel if not set - preseance to input $modelName
          */
-        if ( isset($object['model']) ) {
+        if (isset($object['model'])) {
             $clean['model'] = $object['model'];
         }
-        if ( isset($modelName) ) {
+        if (isset($modelName)) {
             $clean['model'] = $modelName;
         }
 
-        if ( isset($clean['model']) ) {
+        if (isset($clean['model'])) {
             if (!class_exists($clean['model']) || !is_subclass_of($clean['model'], 'RestoModel')) {
                 RestoLogUtil::httpError(400, 'Model "' . $clean['model'] . '" is not a valid model name');
             }
@@ -974,23 +973,26 @@ class RestoCollection
         /*
          * Default collection visibility is the value of RestoConstants::GROUP_DEFAULT_ID
          */
-        if ( isset($object['visibility']) ) {
-            if ( !is_array($object['visibility']) ) {
-                RestoLogUtil::httpError(400, 'Invalid visibility type - should be an array of group names' );
+        if (isset($object['visibility'])) {
+            if (!is_array($object['visibility'])) {
+                RestoLogUtil::httpError(400, 'Invalid visibility type - should be an array of group names');
             }
             // [IMPORTANT] Convert input names to ids
             $clean['visibility'] = (new GeneralFunctions($this->context->dbDriver))->visibilityNamesToIds($object['visibility']);
-            
-            if ( empty($clean['visibility']) ) {
-                RestoLogUtil::httpError(400, 'Visibility is set but either emtpy or referencing an unknown group'); 
+
+            if (empty($clean['visibility'])) {
+                RestoLogUtil::httpError(400, 'Visibility is set but either emtpy or referencing an unknown group');
             }
-            if ( !(new CatalogsFunctions($this->context->dbDriver))->canSeeCatalog($clean['visibility'], $this->user, true) ) {
+            if (!(new CatalogsFunctions($this->context->dbDriver))->canSeeCatalog($clean['visibility'], $this->user, true)) {
                 RestoLogUtil::httpError(403, 'You are not allowed to set the visibility to a group you are not part of');
             }
-            if ( $this->context->core['canSwitchVisibilityToPublic'] && in_array(RestoConstants::GROUP_DEFAULT_ID, $clean['visibility'])) {
-                RestoLogUtil::httpError(403, 'You are not allowed to set the visibility of the default group');
+            if ($this->context->core['canSwitchVisibilityToPublic'] && in_array(RestoConstants::GROUP_DEFAULT_ID, $clean['visibility'])) {
+                $isAdmin = $this->user->hasGroup(RestoConstants::GROUP_ADMIN_ID);
+                if (!$isAdmin) {
+                    RestoLogUtil::httpError(403, 'You are not allowed to set the visibility of the default group');
+                }
             }
-        
+
         }
 
         /*
@@ -1035,17 +1037,17 @@ class RestoCollection
         /*
          * Type is mandatory and must be set to 'Collection'
          */
-        if ( !isset($object['type']) || $object['type'] !== 'Collection') {
+        if (!isset($object['type']) || $object['type'] !== 'Collection') {
             RestoLogUtil::httpError(400, 'Property "type" is mandatory and must be set to *Collection*');
         }
 
         /*
          * description is mandatory
          */
-        if ( !isset($object['description']) ) {
+        if (!isset($object['description'])) {
             RestoLogUtil::httpError(400, 'Property "description" is mandatory');
         }
-         
+
     }
 
     /**
