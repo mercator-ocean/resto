@@ -11,6 +11,7 @@ return array(
     ),
     'storeQuery' => ${STORE_QUERY:-false},
     'collectionMinMatch' => ${COLLECTION_MINMATCH:-0},
+    'canSwitchVisibilityToPublic' => ${CAN_SWITCH_VISIBILITY_TO_PUBLIC:-true},
     'countCatalogs' => ${COUNT_CATALOGS:-false},
     'defaultModel' => '${DEFAULT_COLLECTION_MODEL:-DefaultModel}',
     'timezone' => '${TIMEZONE:-Europe/Paris}',

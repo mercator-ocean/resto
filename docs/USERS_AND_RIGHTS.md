@@ -90,6 +90,21 @@ The rights defines access to resto ressources in particular to authorize CRUD op
 
 rights are defined as boolean properties within a JSON object. The default user's rights are the following:
 
+//TODO check if user has right to create if parent is owned !!!!!
+
+//CREATE_PROJECTNAME_CATALOG
+//Group catalog private no public access if not validated by admin
+// and also validation by peer stamp
+//visibility endpoint should be forbidden to users
+// managing the public catalog updated by users should we let them update because we trust them or should we get the ownership
+
+//username_private default visibility for a user
+// user create for a collection -> all members will see elements in collection
+//projects will design an owner of the group , this owner will be able to give rights to create 
+
+//hint : check API , useright -> hasright to 
+//Scenarios
+// 
         {
                 // If true the user can create a collection under /collections
                 "createCollection": false,
@@ -101,7 +116,8 @@ rights are defined as boolean properties within a JSON object. The default user'
                 "updateAnyCollection": false,
                 
                 // If true the user can create a catalog under /catalogs/projects
-                "createCatalog": true,
+                //->  No one but admin should have catalog right
+                "createCatalog": true, //TODO put to false here and in configuration
 
                 // If true the user can create a catalog anywhere (except in another user private catalog)
                 "createAnyCatalog": false,

@@ -313,7 +313,7 @@ class FeaturesFunctions
        
         // Default visibility
         if ( !isset($featureArray['properties']['visibility']) ) {
-            $featureArray['properties']['visibility'] = RestoUtil::getDefaultVisibility($collection->user, isset($collection->user->profile['settings']['createdItemIsPublic']) ? $collection->user->profile['settings']['createdItemIsPublic'] : true);
+            $featureArray['properties']['visibility'] = RestoUtil::getDefaultVisibility($collection->user, isset($collection->user->profile['settings']['createdItemIsPublic']) ? $collection->user->profile['settings']['createdItemIsPublic'] : true, false);
         }
         $keysAndValues = $this->featureArrayToKeysValues(
             $collection,

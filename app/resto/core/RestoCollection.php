@@ -658,7 +658,7 @@ class RestoCollection
         $this->id = $id;
         $this->context = $context;
         $this->user = $user;
-        $this->visibility = RestoUtil::getDefaultVisibility($this->user, isset($this->user->profile['settings']['createdCollectionIsPublic']) ? $this->user->profile['settings']['createdCollectionIsPublic'] : true);
+        $this->visibility = RestoUtil::getDefaultVisibility($this->user, isset($this->user->profile['settings']['createdCollectionIsPublic']) ? $this->user->profile['settings']['createdCollectionIsPublic'] : true, $this->context->core['canSwitchVisibilityToPublic']);
     }
 
     /**
@@ -986,6 +986,9 @@ class RestoCollection
             }
             if ( !(new CatalogsFunctions($this->context->dbDriver))->canSeeCatalog($clean['visibility'], $this->user, true) ) {
                 RestoLogUtil::httpError(403, 'You are not allowed to set the visibility to a group you are not part of');
+            }
+            if ( $this->context->core['canSwitchVisibilityToPublic'] && in_array(RestoConstants::GROUP_DEFAULT_ID, $clean['visibility'])) {
+                RestoLogUtil::httpError(403, 'You are not allowed to set the visibility of the default group');
             }
         
         }
