@@ -36,7 +36,7 @@ final class UsersTest extends TestCase
 {
     public function testCanCreateUser(): void
     {
-        $response = httpPost("http://localhost:5252/users", json_encode(user("newuser2", "newUser2@toto.fr")));
+        $response = httpPost("http://localhost:5252/users", json_encode(user(uniqid("newuser"), uniqid("newUser") . "@toto.fr")));
 
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
