@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Assert;
 
-final class Utils extends TestCase
+final class Utils extends Assert
 {
     public static function httpPost($url, $data)
     {
@@ -67,9 +67,17 @@ final class Utils extends TestCase
     public function addUserToGroupAPI($ownerName, $groupName, $userName)
     {
         $response = Utils::httpPost("http://" . $ownerName . ":dummy@localhost:5252/groups/" . $groupName . "/users", json_encode(array("username" => $userName)));
-        // $decoded = json_decode($response);
-        // $this->assertSame($decoded->status, "success", $response);
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
     }
+
+        public function createCollectionAPI($ownerName, $collection)
+    {
+        $response = Utils::httpPost("http://" . $ownerName . ":dummy@localhost:5252/collections", json_encode($collection));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+    }
+
 
     public static function user($username, $email)
     {
@@ -88,4 +96,15 @@ final class Utils extends TestCase
             "description" => "Any user can create a group."
         );
     }
+    public static function collection($collectionName, $visibility)
+    {
+        return array(
+            "id" => $collectionName,
+            "type" => "Collection",
+            "title"=> $collectionName,
+            "description" => "My beautiful collection.",
+            "visibility" => $visibility
+        );
+    }
+
 }

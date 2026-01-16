@@ -437,7 +437,7 @@ class GroupAPI
             RestoLogUtil::httpError(400, 'Mandatory username property is missing in message body');
         }
 
-        $user = new RestoUser(array('username' => $body['username']), $this->context);
+        $user = new RestoUser(array('username' => strtolower($body['username'])), $this->context);
         
         /*
          * [SECURITY] Only owner and admin can add user to group

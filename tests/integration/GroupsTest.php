@@ -31,7 +31,7 @@ final class GroupsTest extends TestCase
 
     public function testCanToto()
     {
-        $utils = new Utils("");
+        $utils = new Utils();
 
         $groupOwnerUserName = uniqid("groupOwner");
         $utils->createAPIUser($groupOwnerUserName);
@@ -47,12 +47,19 @@ final class GroupsTest extends TestCase
 
         $utils->addUserToGroupAPI($groupOwnerUserName, $groupName, $inGroupUserName);
 
-        //user2 added to group
-        //user3 not in group
+        $goodRight = array(RestoGroup::createItemRight($groupName) => true);
+        $response = Utils::httpPost("http://" . $groupOwnerUserName . ":dummy@localhost:5252/groups/" . $groupName . "/rights", json_encode($goodRight));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
 
-        //user1 add group right to create items
-        //user1 create collection
+        $collectionName =  uniqid("collection");
+        $collection=Utils::collection($collectionName,array($groupName));
+        $utils->createCollectionAPI($groupOwnerUserName, $collection);
+
+
+        //user1 create collection ->  si il cree un colection dans son group visible  de son group
         //user2 create item in group collection
+        //user2 cannot create collection
 
         //user3 cannot see group collection
         //user3 cannot create item in group collection
