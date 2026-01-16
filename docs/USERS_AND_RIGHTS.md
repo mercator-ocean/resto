@@ -92,7 +92,7 @@ rights are defined as boolean properties within a JSON object. The default user'
 
 //TODO check if user has right to create if parent is owned !!!!!
 
-//CREATE_PROJECTNAME_CATALOG
+//CREATE_GOUPNAME_CATALOG
 //Group catalog private no public access if not validated by admin
 // and also validation by peer stamp
 //visibility endpoint should be forbidden to users
@@ -102,9 +102,39 @@ rights are defined as boolean properties within a JSON object. The default user'
 // user create for a collection -> all members will see elements in collection
 //projects will design an owner of the group , this owner will be able to give rights to create 
 
+//--------> group creation all right to true by default
+Create item in handlesimpleright
+can create if user is in same group as collection visibilty
+delete item and update item by collection owner and item owner
+
+
 //hint : check API , useright -> hasright to 
-//Scenarios
-// 
+
+//Jerome verif:
+// Les droits utilisateurs ecrasent les droits de groupes, ok? ou inverse? ou hierarchie(groupe && user)?
+//questino droits des catalogs
+
+
+//Scenario 1 
+Groupes Coclico et Glonet
+Every resources in coclico and glonet are private
+User coclico1 
+User Glonet1
+GLonet1 can create item and catalog in glonet, cannot delete existant
+Glonet1 can see every everything in Glonet
+Glonet1 see nothing in Coclico
+GLonet1 cannot create item and catalog in coclico
+
+
+coclico1 can create item and catalog in coclico, cannot delete existant
+coclico1 can see every everything in coclico
+coclico1 see nothing in Glonet
+coclico1 cannot create item and catalog in glonet
+
+
+//
+
+
         {
                 // If true the user can create a collection under /collections
                 "createCollection": false,

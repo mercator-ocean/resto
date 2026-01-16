@@ -270,7 +270,7 @@ class GroupAPI
     {
 
         if (str_ends_with($body['name'], RestoUser::USER_GROUP_SUFFIX)) {
-            RestoLogUtil::httpError(403, 'You are not allowed to create a user group');
+            RestoLogUtil::httpError(400, 'Group name cannot end with '. RestoUser::USER_GROUP_SUFFIX );
         }
         // Owner of group can only be set by admin user
         if (isset($body['owner']) && !$this->user->hasGroup(RestoConstants::GROUP_ADMIN_ID)) {

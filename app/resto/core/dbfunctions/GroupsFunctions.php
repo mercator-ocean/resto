@@ -116,6 +116,9 @@ class GroupsFunctions
         if (! isset($group['name'])) {
             RestoLogUtil::httpError(400, 'Missing mandatory group name');
         }
+        if (strtolower($group['name']) === "any"){
+            RestoLogUtil::httpError(400, 'Group name cannot be "any"');
+        }
 
         try {
 
