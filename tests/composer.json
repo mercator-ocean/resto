@@ -3,7 +3,6 @@
         "phpunit/phpunit": "^12"
     },
     "autoload": {
-        "classmap": ["integration/"],
-        "files": ["..app/resto/core/RestoGroup.php"]
+        "classmap": ["integration/", "../app/resto/core/"]
     }
 }
