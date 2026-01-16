@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
+use PHPUnit\Framework\TestCase;
 
-class Utils
+final class Utils extends TestCase
 {
     public static function httpPost($url, $data)
     {
@@ -49,6 +50,27 @@ class Utils
     }
 
 
+    public function createAPIUser($userName)
+    {
+        $response = Utils::httpPost("http://localhost:5252/users", json_encode(Utils::user($userName, $userName . "@toto.fr")));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+    }
+
+    public function createAPIGroup($userName, $groupName)
+    {
+        $response = Utils::httpPost("http://" . $userName . ":dummy@localhost:5252/groups", json_encode(Utils::group($groupName)));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+    }
+
+    public function addUserToGroupAPI($ownerName, $groupName, $userName)
+    {
+        $response = Utils::httpPost("http://" . $ownerName . ":dummy@localhost:5252/groups/" . $groupName . "/users", json_encode(array("username" => $userName)));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+    }
+
     public static function user($username, $email)
     {
         return array(
@@ -66,5 +88,4 @@ class Utils
             "description" => "Any user can create a group."
         );
     }
-
 }
