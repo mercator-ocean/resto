@@ -31,7 +31,60 @@ final class UsersTest extends TestCase
         $response = Utils::httpGet("http://" . $userName . ":" . "dummy@localhost:5252/users/" . $userName);
 
         $decoded = json_decode($response);
-        $this->assertSame($decoded->bio, $profile['bio'], $response);    
+        $this->assertSame($decoded->bio, $profile['bio'], $response);
     }
 
+    public function testCanGetUserOwnProfile(): void
+    {
+        $utils = new Utils();
+
+        $userName = uniqid("newuser");
+        $utils->createAPIUser($userName);
+
+        $response = Utils::httpGet("http://" . $userName . ":" . "dummy@localhost:5252/users/" . $userName);
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->username, $userName, $response);
+
+        $response = Utils::httpGet("http://" . $userName . ":" . "dummy@localhost:5252/me");
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->username, $userName, $response);
+    }
+
+    public function testCanGetOtherUserProfile(): void
+    {
+        $utils = new Utils();
+
+        $passiveUserName = uniqid("newuser");
+        $utils->createAPIUser($passiveUserName);
+
+        $activeUserName = uniqid("newuser");
+        $utils->createAPIUser($activeUserName);
+
+        $response = Utils::httpGet("http://" . $activeUserName . ":" . "dummy@localhost:5252/users/" . $passiveUserName);
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->username, $passiveUserName, $response);
+    }
+
+    public function testCanAuthenticateThroughToken(): void
+    {
+        //  $utils = new Utils();
+
+        // $userName = uniqid("newuser");
+        // $utils->createAPIUser($userName);
+        //TODO complete this test with user beraer token creation and access info using this token
+    }
+
+    public function testCanGetUserRights(): void
+    {
+        $utils = new Utils();
+
+        $userName = uniqid("newuser");
+        $utils->createAPIUser($userName);
+
+        $rights = $utils->rights();
+
+        $response = Utils::httpGet("http://" . $userName . ":" . "dummy@localhost:5252/users/".$userName."/rights");
+        $decoded = json_decode($response);
+        $this->assertArrayIsEqualToArrayIgnoringListOfKeys(array($decoded->rights), $rights,[], $response);
+    }
 }

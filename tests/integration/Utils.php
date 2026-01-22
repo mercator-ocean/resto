@@ -49,6 +49,20 @@ final class Utils extends Assert
         return $response;
     }
 
+    public static function httpGetWithHeader($url, $headerContent)
+    { //TODO needs to allow checking of berarer token and if possible have only one function with httpGet calling this one with no content in $headerContent
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            $headerContent
+        ));
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
+    }
+
 
     public function createAPIUser($userName)
     {
@@ -71,7 +85,7 @@ final class Utils extends Assert
         $this->assertSame($decoded->status, "success", $response);
     }
 
-        public function createCollectionAPI($ownerName, $collection)
+    public function createCollectionAPI($ownerName, $collection)
     {
         $response = Utils::httpPost("http://" . $ownerName . ":dummy@localhost:5252/collections", json_encode($collection));
         $decoded = json_decode($response);
@@ -101,10 +115,28 @@ final class Utils extends Assert
         return array(
             "id" => $collectionName,
             "type" => "Collection",
-            "title"=> $collectionName,
+            "title" => $collectionName,
             "description" => "My beautiful collection.",
             "visibility" => $visibility
         );
     }
 
+    public static function rights()
+    {
+        return array(
+
+            "createCollection" => false,
+            "deleteAnyCollection" => false,
+            "updateAnyCollection" => false,
+            "createCatalog" => false,
+            "createAnyCatalog" => false,
+            "deleteAnyCatalog" => false,
+            "updateAnyCatalog" => false,
+            "createFeature" => false,
+            "createAnyFeature" => false,
+            "deleteAnyFeature" => false,
+            "updateAnyFeature" => false,
+            "catalogs" => "{}"
+        );
+    }
 }
