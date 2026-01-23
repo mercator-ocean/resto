@@ -19,19 +19,19 @@ final class GroupsTest extends TestCase
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
 
-        $unauthorizedRight = array("createCollection" => true);
+        $unauthorizedRight = ["createCollection" => true];
         $response = Utils::httpPost("http://" . $userName . ":dummy@localhost:5252/groups/" . $groupName . "/rights", json_encode($unauthorizedRight));
         $decoded = json_decode($response);
         $this->assertSame($decoded->ErrorCode, 400, $response);
 
-        $goodRight = array(RestoGroup::createItemRight($groupName) => true);
+        $goodRight = [RestoGroup::createItemRight($groupName) => true];
         $response = Utils::httpPost("http://" . $userName . ":dummy@localhost:5252/groups/" . $groupName . "/rights", json_encode($goodRight));
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
     }
 
     #[Group('only')]
-    public function testCanToto()
+    public function testCanToto(): void
     {
         $utils = new Utils();
 
@@ -49,13 +49,13 @@ final class GroupsTest extends TestCase
 
         $utils->addUserToGroupAPI($groupOwnerUserName, $groupName, $inGroupUserName);
 
-        $goodRight = array(RestoGroup::createItemRight($groupName) => true);
+        $goodRight = [RestoGroup::createItemRight($groupName) => true];
         $response = Utils::httpPost("http://" . $groupOwnerUserName . ":dummy@localhost:5252/groups/" . $groupName . "/rights", json_encode($goodRight));
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
 
         $collectionName =  uniqid("collection");
-        $collection = Utils::collection($collectionName, array($groupName));
+        $collection = Utils::collection($collectionName, [$groupName]);
         $response = Utils::httpGet("http://" . $groupOwnerUserName . ":" . "dummy@localhost:5252/users/" . $groupOwnerUserName . "/rights");
         print_r($response);
         $ownerRights = json_decode(Utils::httpGet("http://" . $groupOwnerUserName . ":dummy@localhost:5252/users/" . $groupOwnerUserName . "/rights"));

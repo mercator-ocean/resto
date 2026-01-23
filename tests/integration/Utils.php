@@ -6,48 +6,48 @@ use PHPUnit\Framework\Assert;
 
 final class Utils extends Assert
 {
-    public static function httpPost($url, $data)
+    public static function httpPost(string $url, string $data): string
     {
         $curl = curl_init($url);
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+        curl_setopt($curl, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Content-Length: ' . strlen($data)
-        ));
+            'Content-Length: ' . strlen($data),
+        ]);
         $response = curl_exec($curl);
         curl_close($curl);
         return $response;
     }
 
-    public static function httpPut($url, $data)
+    public static function httpPut(string $url, string $data): string
     {
         $curl = curl_init($url);
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
         curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+        curl_setopt($curl, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Content-Length: ' . strlen($data)
-        ));
+            'Content-Length: ' . strlen($data),
+        ]);
         $response = curl_exec($curl);
         curl_close($curl);
         return $response;
     }
 
-    public static function httpGet($url)
+    public static function httpGet(string $url): string
     {
-       return Utils::httpGetWithHeader($url, '');
+        return Utils::httpGetWithHeader($url, '');
     }
 
-    public static function httpGetWithHeader($url, $headerContent)
+    public static function httpGetWithHeader(string $url, string $headerContent): string
     { //TODO needs to allow checking of berarer token and if possible have only one function with httpGet calling this one with no content in $headerContent
         $curl = curl_init($url);
-        $headerArray = array(
+        $headerArray = [
             'Content-Type: application/json',
-            $headerContent
-        );
+            $headerContent,
+        ];
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headerArray);
@@ -55,78 +55,90 @@ final class Utils extends Assert
         curl_close($curl);
         return $response;
     }
-
-
-    public function createAPIUser($userName)
+    public function createAPIUser(string $userName): void
     {
         $response = Utils::httpPost("http://localhost:5252/users", json_encode(Utils::user($userName, $userName . "@toto.fr")));
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
     }
-
-    public function createAPIGroup($userName, $groupName)
+    public function createAPIGroup(string $userName, string $groupName): void
     {
         $response = Utils::httpPost("http://" . $userName . ":dummy@localhost:5252/groups", json_encode(Utils::group($groupName)));
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
     }
 
-    public function addUserToGroupAPI($ownerName, $groupName, $userName)
+    public function addUserToGroupAPI(string $ownerName, string $groupName, string $userName): void
     {
-        $response = Utils::httpPost("http://" . $ownerName . ":dummy@localhost:5252/groups/" . $groupName . "/users", json_encode(array("username" => $userName)));
+        $response = Utils::httpPost("http://" . $ownerName . ":dummy@localhost:5252/groups/" . $groupName . "/users", json_encode(["username" => $userName]));
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
     }
-
-    public function createCollectionAPI($ownerName, $collection)
+    /**
+     * @param array<int,mixed> $collection
+     */
+    public function createCollectionAPI(string $ownerName, array $collection): void
     {
         $response = Utils::httpPost("http://" . $ownerName . ":dummy@localhost:5252/collections", json_encode($collection));
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
     }
-
-    public function adminAddRightsToUserAPI($userName, $rights)
+    /**
+     * @param array<int,mixed> $rights
+     */
+    public function adminAddRightsToUserAPI(string $userName, array $rights): void
     {
         $response = Utils::httpPost("http://admin:admin@localhost:5252/users/" . $userName . "/rights", json_encode($rights));
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
     }
-
-    public static function user($username, $email)
+    /**
+     * @return array<string,string>
+     */
+    public static function user(string $username, string $email): array
     {
-        return array(
+        return [
             "username" => $username,
             "firstname" => "John",
             "lastname" => "Doe",
             "email" => $email,
-            "password" => "dummy"
-        );
+            "password" => "dummy",
+        ];
     }
-    public static function group(string $groupName)
+    /**
+     * @return array<string,string>
+     */
+    public static function group(string $groupName): array
     {
-        return array(
+        return [
             "name" => $groupName,
-            "description" => "Any user can create a group."
-        );
+            "description" => "Any user can create a group.",
+        ];
     }
-    public static function collection(string $collectionName, string $visibility)
+    /**
+     * @return array<string,string>
+     * @param array<string> $visibility
+     */
+    public static function collection(string $collectionName, array $visibility): array
     {
-        $value = array(
+        $value = [
             "id" => $collectionName,
             "type" => "Collection",
             "title" => $collectionName,
             "description" => "My beautiful collection.",
-        );
+        ];
 
-        if ($visibility){
+        if ($visibility) {
             $value['visibility'] = $visibility;
         }
+        return $value;
     }
-    
-
-    public static function rights()
+    /**
+     * @return array<string,mixed>
+     */
+    public static function rights(): array
     {
-        return array(
+        return [
 
             "createCollection" => false,
             "deleteAnyCollection" => false,
@@ -139,7 +151,7 @@ final class Utils extends Assert
             "createAnyFeature" => false,
             "deleteAnyFeature" => false,
             "updateAnyFeature" => false,
-            "catalogs" => "{}"
-        );
+            "catalogs" => "{}",
+        ];
     }
 }

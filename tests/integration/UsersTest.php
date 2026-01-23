@@ -21,7 +21,7 @@ final class UsersTest extends TestCase
 
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
-        $profile = array("bio" => "This is John Doe biography - pretty empty");
+        $profile = ["bio" => "This is John Doe biography - pretty empty"];
         $response = Utils::httpPut("http://" . $userName . ":" . "dummy@localhost:5252/users/" . $userName, json_encode($profile));
 
         $decoded = json_decode($response);
@@ -90,6 +90,6 @@ final class UsersTest extends TestCase
         $rights = $utils->rights();
 
         $response = Utils::httpGet("http://" . $userName . ":" . "dummy@localhost:5252/users/" . $userName . "/rights");
-        $this->assertJsonStringEqualsJsonString($response, json_encode(array('rights' => $rights)), 'equals', $response);
+        $this->assertJsonStringEqualsJsonString($response, json_encode(['rights' => $rights]), 'equals', $response);
     }
 }
