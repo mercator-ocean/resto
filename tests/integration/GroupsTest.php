@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 final class GroupsTest extends TestCase
 {
@@ -29,39 +30,44 @@ final class GroupsTest extends TestCase
         $this->assertSame($decoded->status, "success", $response);
     }
 
+    #[Group('only')]
     public function testCanToto()
     {
-        // $utils = new Utils();
+        $utils = new Utils();
 
-        // $groupOwnerUserName = uniqid("groupOwner");
-        // $utils->createAPIUser($groupOwnerUserName);
+        $groupOwnerUserName = uniqid("groupowner");
+        $utils->createAPIUser($groupOwnerUserName);
 
-        // $inGroupUserName = uniqid("userInGroup");
-        // $utils->createAPIUser($inGroupUserName);
+        $inGroupUserName = uniqid("useringroup");
+        $utils->createAPIUser($inGroupUserName);
 
-        // $randomUserName = uniqid("leQuentin");
-        // $utils->createAPIUser($randomUserName);
+        $randomUserName = uniqid("lequentin");
+        $utils->createAPIUser($randomUserName);
 
-        // $groupName = uniqid("itemCreationGroup");
-        // $utils->createAPIGroup($groupOwnerUserName, $groupName);
+        $groupName = uniqid("itemCreationGroup");
+        $utils->createAPIGroup($groupOwnerUserName, $groupName);
 
-        // $utils->addUserToGroupAPI($groupOwnerUserName, $groupName, $inGroupUserName);
+        $utils->addUserToGroupAPI($groupOwnerUserName, $groupName, $inGroupUserName);
 
-        // $goodRight = array(RestoGroup::createItemRight($groupName) => true);
-        // $response = Utils::httpPost("http://" . $groupOwnerUserName . ":dummy@localhost:5252/groups/" . $groupName . "/rights", json_encode($goodRight));
-        // $decoded = json_decode($response);
-        // $this->assertSame($decoded->status, "success", $response);
+        $goodRight = array(RestoGroup::createItemRight($groupName) => true);
+        $response = Utils::httpPost("http://" . $groupOwnerUserName . ":dummy@localhost:5252/groups/" . $groupName . "/rights", json_encode($goodRight));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
 
-        // $collectionName =  uniqid("collection");
-        // $collection=Utils::collection($collectionName,array($groupName));
-        // $utils->createCollectionAPI($groupOwnerUserName, $collection);
+        $collectionName =  uniqid("collection");
+        $collection = Utils::collection($collectionName, array($groupName));
+        $response = Utils::httpGet("http://" . $groupOwnerUserName . ":" . "dummy@localhost:5252/users/" . $groupOwnerUserName . "/rights");
+        print_r($response);
+        $ownerRights = json_decode(Utils::httpGet("http://" . $groupOwnerUserName . ":dummy@localhost:5252/users/" . $groupOwnerUserName . "/rights"));
+        print_r($ownerRights);
+        $utils->createCollectionAPI($groupOwnerUserName, $collection);
 
 
-        //user1 create collection ->  si il cree un colection dans son group visible  de son group
-        //user2 create item in group collection
-        //user2 cannot create collection
+        // user1 create collection ->  si il cree un colection dans son group visible  de son group
+        // user2 create item in group collection
+        // user2 cannot create collection
 
-        //user3 cannot see group collection
-        //user3 cannot create item in group collection
+        // user3 cannot see group collection
+        // user3 cannot create item in group collection
     }
 }

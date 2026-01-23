@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
-
 final class UsersTest extends TestCase
 {
     public function testCanCreateUser(): void
@@ -67,11 +66,18 @@ final class UsersTest extends TestCase
 
     public function testCanAuthenticateThroughToken(): void
     {
-        //  $utils = new Utils();
+        $utils = new Utils();
 
-        // $userName = uniqid("newuser");
-        // $utils->createAPIUser($userName);
-        //TODO complete this test with user beraer token creation and access info using this token
+        $userName = uniqid("newuser");
+        $utils->createAPIUser($userName);
+        $response = Utils::httpGet("http://admin:admin@localhost:5252/auth/create?duration=1&username=" . $userName);
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->username, $userName, $response);
+
+        $token = $decoded->token;
+        $response = Utils::httpGetWithHeader("http://localhost:5252/me", "Authorization: Bearer " . $token);
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->username, $userName, $response);
     }
 
     public function testCanGetUserRights(): void
@@ -83,8 +89,7 @@ final class UsersTest extends TestCase
 
         $rights = $utils->rights();
 
-        $response = Utils::httpGet("http://" . $userName . ":" . "dummy@localhost:5252/users/".$userName."/rights");
-        $decoded = json_decode($response);
-        $this->assertArrayIsEqualToArrayIgnoringListOfKeys(array($decoded->rights), $rights,[], $response);
+        $response = Utils::httpGet("http://" . $userName . ":" . "dummy@localhost:5252/users/" . $userName . "/rights");
+        $this->assertJsonStringEqualsJsonString($response, json_encode(array('rights' => $rights)), 'equals', $response);
     }
 }

@@ -3,5 +3,7 @@ init:
 install:
 	composer install
 test:
-	./vendor/bin/phpunit --testdox integration/
+	./vendor/bin/phpunit --colors --testdox integration/
 
+test-only:
+	./vendor/bin/phpunit  --colors --testdox integration/ --group 'only'

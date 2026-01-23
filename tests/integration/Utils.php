@@ -38,26 +38,19 @@ final class Utils extends Assert
 
     public static function httpGet($url)
     {
-        $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json'
-        ));
-        $response = curl_exec($curl);
-        curl_close($curl);
-        return $response;
+       return Utils::httpGetWithHeader($url, '');
     }
 
     public static function httpGetWithHeader($url, $headerContent)
     { //TODO needs to allow checking of berarer token and if possible have only one function with httpGet calling this one with no content in $headerContent
         $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+        $headerArray = array(
             'Content-Type: application/json',
             $headerContent
-        ));
+        );
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headerArray);
         $response = curl_exec($curl);
         curl_close($curl);
         return $response;
@@ -92,6 +85,12 @@ final class Utils extends Assert
         $this->assertSame($decoded->status, "success", $response);
     }
 
+    public function adminAddRightsToUserAPI($userName, $rights)
+    {
+        $response = Utils::httpPost("http://admin:admin@localhost:5252/users/" . $userName . "/rights", json_encode($rights));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+    }
 
     public static function user($username, $email)
     {
@@ -103,23 +102,27 @@ final class Utils extends Assert
             "password" => "dummy"
         );
     }
-    public static function group($groupName)
+    public static function group(string $groupName)
     {
         return array(
             "name" => $groupName,
             "description" => "Any user can create a group."
         );
     }
-    public static function collection($collectionName, $visibility)
+    public static function collection(string $collectionName, string $visibility)
     {
-        return array(
+        $value = array(
             "id" => $collectionName,
             "type" => "Collection",
             "title" => $collectionName,
             "description" => "My beautiful collection.",
-            "visibility" => $visibility
         );
+
+        if ($visibility){
+            $value['visibility'] = $visibility;
+        }
     }
+    
 
     public static function rights()
     {

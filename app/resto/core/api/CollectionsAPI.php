@@ -289,8 +289,9 @@ class CollectionsAPI
      */
     public function createCollection($params, $body)
     {
-        
-        if (!$this->user->hasRightsTo(RestoUser::CREATE_COLLECTION)) {
+
+        if (!$this->user->hasRightsTo(RestoUser::CREATE_COLLECTION) && (!in_array('visibility', $body) || $body['visibility'] === array('default')))
+        {
             RestoLogUtil::httpError(403);
         }
 
