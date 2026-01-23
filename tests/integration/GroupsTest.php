@@ -57,9 +57,7 @@ final class GroupsTest extends TestCase
         $collectionName =  uniqid("collection");
         $collection = Utils::collection($collectionName, [$groupName]);
         $response = Utils::httpGet("http://" . $groupOwnerUserName . ":" . "dummy@localhost:5252/users/" . $groupOwnerUserName . "/rights");
-        print_r($response);
         $ownerRights = json_decode(Utils::httpGet("http://" . $groupOwnerUserName . ":dummy@localhost:5252/users/" . $groupOwnerUserName . "/rights"));
-        print_r($ownerRights);
         $utils->createCollectionAPI($groupOwnerUserName, $collection);
 
 

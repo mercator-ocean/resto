@@ -14,3 +14,4 @@ _config*.env
 _docker-compose*.yml
 backup/*
 tests/vendor
+.php-cs-fixer.dist.php
