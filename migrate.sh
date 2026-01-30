@@ -1,12 +1,16 @@
 #!/bin/bash
 
+# restic -r swift:restic-bckp-restodb:/PRODUCTION --verbose restore latest --target .
+
 psql -U resto -h 127.0.0.1 <<SQL
 DROP SCHEMA resto CASCADE;
+DROP SCHEMA public CASCADE;
 CREATE SCHEMA IF NOT EXISTS resto;
+CREATE SCHEMA IF NOT EXISTS public;
 CREATE EXTENSION IF NOT EXISTS ltree WITH SCHEMA resto;
 SQL
 
-pg_restore -h 127.0.0.1 -U resto -d resto ~/dump-resto-202601301123.sql
+pg_restore -h 127.0.0.1 -U resto -d resto share/restodb.bak
 
 psql -U resto -h 127.0.0.1 <<SQL
 --- Migration 9.7 and 9.8
