@@ -31,7 +31,7 @@ final class GroupsTest extends TestCase
     }
 
     #[Group('only')]
-    public function testCanToto(): void
+    public function testCanPlayWithGroupRightCreation(): void
     {
         $utils = new Utils();
 
@@ -49,23 +49,43 @@ final class GroupsTest extends TestCase
 
         $utils->addUserToGroupAPI($groupOwnerUserName, $groupName, $inGroupUserName);
 
-        $goodRight = [RestoGroup::createItemRight($groupName) => true];
-        $response = Utils::httpPost("http://" . $groupOwnerUserName . ":dummy@localhost:5252/groups/" . $groupName . "/rights", json_encode($goodRight));
+        $itemRight = [
+            RestoGroup::createItemRight($groupName) => true,
+        ];
+        $collectionRight = [
+            RestoGroup::createCollectionRight($groupName)=>true,
+        ];
+        $response = Utils::httpPost("http://" . $groupOwnerUserName . ":dummy@localhost:5252/groups/" . $groupName . "/rights", json_encode($itemRight));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+
+        $response = Utils::httpPost("http://admin:admin@localhost:5252/users/" . $groupOwnerUserName . "/rights", json_encode($collectionRight));
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
 
         $collectionName =  uniqid("collection");
         $collection = Utils::collection($collectionName, [$groupName]);
-        $response = Utils::httpGet("http://" . $groupOwnerUserName . ":" . "dummy@localhost:5252/users/" . $groupOwnerUserName . "/rights");
-        $ownerRights = json_decode(Utils::httpGet("http://" . $groupOwnerUserName . ":dummy@localhost:5252/users/" . $groupOwnerUserName . "/rights"));
         $utils->createCollectionAPI($groupOwnerUserName, $collection);
 
+        //inGroupUser is forbidden to create collection in group
+        $response = Utils::httpPost("http://" . $inGroupUserName . ":dummy@localhost:5252/collections", json_encode($collection));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->ErrorCode, 403, $response);
 
-        // user1 create collection ->  si il cree un colection dans son group visible  de son group
-        // user2 create item in group collection
-        // user2 cannot create collection
+        //inGroupUser can create items in collection with group visibility
+        $response = $utils->createItemAPI($inGroupUserName, $collectionName, Utils::item(uniqid("item1"), []));
 
-        // user3 cannot see group collection
-        // user3 cannot create item in group collection
+        //randomUser cannot see collection if not in group with visibility
+        $response= Utils::httpGet("http://" . $randomUserName . ":dummy@localhost:5252/collections/" . $collectionName);
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->ErrorCode, 404, $response);
+
+        //randomUser cannot create items in collection with group visibility
+        $response = Utils::httpPost("http://" . $randomUserName . ":dummy@localhost:5252/collections/" . $collectionName . "/items", json_encode(Utils::item(uniqid("item2"), [])));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->ErrorCode, 404, $response);
     }
 }
+//TODO update colleciton
+//TODO delete collection
+

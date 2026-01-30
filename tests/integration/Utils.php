@@ -83,6 +83,17 @@ final class Utils extends Assert
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
     }
+
+    /**
+     * @param array<int,mixed> $item
+     */
+    public function createItemAPI(string $ownerName, string $collectionName, array $item): void
+    {
+        $response = Utils::httpPost("http://" . $ownerName . ":dummy@localhost:5252/collections/" . $collectionName . "/items", json_encode($item));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+    }
+
     /**
      * @param array<int,mixed> $rights
      */
@@ -132,6 +143,39 @@ final class Utils extends Assert
             $value['visibility'] = $visibility;
         }
         return $value;
+    }
+
+    /**
+     * @return array<string,string>
+     * @param array<string> $visibility
+     */
+    public static function item(string $itemName, array $visibility): array
+    {
+        $value = [
+                "datetime" => "2024-06-21T16:27:00Z",
+                "description" => "This is test item" ,
+            ];
+        if ($visibility) {
+            $value['visibility'] = $visibility;
+        }
+
+        return [
+            "id" => $itemName,
+            "type" => "Feature",
+            "properties" =>$value,
+            "geometry" => [
+                "coordinates" => [
+                    [
+                        [-64.8,              32.3],
+                        [-65.5,              18.3],
+                        [-80.3,              25.2],
+                        [-64.8,              32.3]
+                    ]
+                ],
+                "type" => "Polygon"
+            ]
+        ];
+
     }
     /**
      * @return array<string,mixed>

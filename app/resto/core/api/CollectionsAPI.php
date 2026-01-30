@@ -290,13 +290,32 @@ class CollectionsAPI
     public function createCollection($params, $body)
     {
 
-        if (!$this->user->hasRightsTo(RestoUser::CREATE_COLLECTION) && (!in_array('visibility', $body) || $body['visibility'] === array('default')))
+        // if (!$this->user->hasRightsTo(RestoUser::CREATE_COLLECTION) && (!in_array('visibility', $body) || empty(array_diff($body['visibility'], array('default')))))
+        // {
+        //     RestoLogUtil::httpError(403);
+        // }
+        if ($this->user->hasRightsTo(RestoUser::CREATE_COLLECTION))
+        {
+            $this->context->keeper->getRestoCollections($this->user)->create($body, $params['model'] ?? null);
+            return RestoLogUtil::success('Collection ' . $body['id'] . ' created');
+        } elseif (empty($body['visibility']))
         {
             RestoLogUtil::httpError(403);
         }
 
+        foreach ($body['visibility'] as $group)
+        {
+            $canCreateInGroup = $this->user->hasRightsTo(RestoGroup::createCollectionRight($group));
+            if (!$canCreateInGroup){
+                RestoLogUtil::httpError(403, 'Insufficient rights to create a collection in group ' . $group);
+            }
+        }
         $this->context->keeper->getRestoCollections($this->user)->create($body, $params['model'] ?? null);
-        
+
+        // si y'a des visibilités --> est-ce qu'il a le droit sur chacun des groupes
+        // si oui --> create
+        // si non --> forbidden
+
         return RestoLogUtil::success('Collection ' . $body['id'] . ' created');
     }
 
@@ -600,9 +619,24 @@ class CollectionsAPI
          * Load collection
          */
         $collection = $this->context->keeper->getRestoCollection($params['collectionId'], $this->user)->load();
+        error_log('collection to create item from');
+        error_log(json_encode($collection->visibility));
         
         if (!$this->user->hasRightsTo(RestoUser::CREATE_ITEM, array('collection' => $collection))) {
-            RestoLogUtil::httpError(403);
+            if (empty($collection->visibility)){
+                RestoLogUtil::httpError(403);
+            }
+            $groups = (new GroupsFunctions($this->context->dbDriver))->getGroups(array('in' => $collection->visibility));
+
+            $can = false;
+            foreach ($groups as $group) {
+                if ($this->user->hasRightsTo(RestoGroup::createItemRight($group['name']))){
+                     $can=true;
+                }
+            }
+            if (!$can){
+                RestoLogUtil::httpError(403);
+            }
         }
         
         /*

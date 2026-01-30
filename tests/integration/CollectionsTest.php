@@ -7,7 +7,6 @@ use PHPUnit\Framework\Attributes\Group;
 
 final class CollectionsTest extends TestCase
 {
-    #[Group('only')]
     public function testCanCreateCollection(): void
     {
         $utils = new Utils();
