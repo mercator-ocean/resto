@@ -14,7 +14,6 @@ final class CollectionsTest extends TestCase
         $utils->createAPIUser($userHasCollectionRight);
         $userWithoutRights = uniqid("userwithoutrights");
         $utils->createAPIUser($userWithoutRights);
-        //TODO give him CREATE_COLLECTION right
         $createCollectionRight = ["createCollection" => true];
 
         $utils->adminAddRightsToUserAPI($userHasCollectionRight, $createCollectionRight);
@@ -39,7 +38,6 @@ final class CollectionsTest extends TestCase
         $utils->createAPIUser($userHasCollectionRight);
         $userWithoutRights = uniqid("userwithoutrights");
         $utils->createAPIUser($userWithoutRights);
-        //TODO give him CREATE_COLLECTION right
         $createCollectionRight = ["createCollection" => true];
 
         $userHasUpdateCollectionRight = uniqid("userwithupdatecollectionright");
@@ -72,7 +70,4 @@ final class CollectionsTest extends TestCase
         $decoded = json_decode($response);
         $this->assertSame($decoded->ErrorMessage, "updateCollection - Forbidden", $response);
     }
-
-         //Collection test 
-        // TODO: delete collection with item inside
 }

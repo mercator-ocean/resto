@@ -55,7 +55,7 @@ final class Utils extends Assert
     }
 
     public static function httpGetWithHeader(string $url, string $headerContent): string
-    { //TODO needs to allow checking of berarer token and if possible have only one function with httpGet calling this one with no content in $headerContent
+    {
         $curl = curl_init($url);
         $headerArray = [
             'Content-Type: application/json',

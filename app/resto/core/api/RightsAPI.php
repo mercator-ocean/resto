@@ -452,14 +452,10 @@ class RightsAPI
         $group = (new GroupsFunctions($this->context->dbDriver))->getGroup($params['name']);
 
         if (!$this->user->hasGroup(RestoConstants::GROUP_ADMIN_ID)) {
-            //CODE specific group owner
             if (!$group['owner'] === $this->user->id) {
                 RestoLogUtil::httpError(403, 'Only the owner of the group can set rights');
             }
 
-            //check CREATE UPDATE DELETE nom_du_group check COLLECTION ITEM CATALOG
-            //TODO check keys in body appartiennent au droit d'utlisateur du group RestoGroup::getAllRights(groupname)
-//in_array , array_keys
             $allGroupRights = RestoGroup::getAllRights($params['name']);
             foreach (array_keys($body) as $bodyRight) {
                 if (!in_array($bodyRight, $allGroupRights)) {
@@ -474,8 +470,6 @@ class RightsAPI
             /*
              * [SECURITY] Only admin can set any group rights
              */
-
-
             return RestoLogUtil::success('Rights set', array(
                 'rights' => (new RightsFunctions($this->context->dbDriver))->storeOrUpdateRights('groupid', $group['id'], rights: $body)
             ));
