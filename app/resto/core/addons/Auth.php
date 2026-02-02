@@ -612,8 +612,9 @@ class Auth extends RestoAddOn
         foreach ($inputGroups as $groupName) {
             if (($this->options['ignoreUppercaseGroups'] == false || !preg_match('/[A-Z]/', $groupName)) && !in_array($groupName, $userGroupNames)) {
                 if (!in_array($groupName, $groupNamesInDB)) {
-                    //TODO check groupname doesn't end with user_suffix(_private)
-                    //if(str_ends_with($groupName, RestoUser::USER_GROUP_SUFFIX))
+                    if (str_ends_with($groupName, RestoUser::USER_GROUP_SUFFIX)) {
+                        RestoLogUtil::httpError(403, "Cannot create private group");
+                    }
                     $groupsFunctions->createGroup(array(
                       "name" => $groupName,
                       "owner" => $user->profile['id'],
