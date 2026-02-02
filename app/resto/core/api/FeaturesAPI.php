@@ -686,7 +686,6 @@ class FeaturesAPI
             'featureId' => $params['featureId'],
             'collection' => $collection
         ));
-        error_log("Feature" . json_encode($feature));
 
         if (!$feature->isValid()) {
             RestoLogUtil::httpError(404);
@@ -697,7 +696,6 @@ class FeaturesAPI
             $params['_splitGeom'] = isset($params['_splitGeom']) && filter_var($params['_splitGeom'], FILTER_VALIDATE_BOOLEAN) === false ? false : $this->context->core["splitGeometryOnDateLine"];
             return $collection->model->updateFeature($feature, $collection, $body, $params);
         }
-        error_log("TOTO".$body["description"]." ".json_encode($body['visibility']));
         if (isset($body['properties']['visibility'])) {
             RestoLogUtil::httpError(403, 'Forbidden to update item visibility');
         }
@@ -706,7 +704,6 @@ class FeaturesAPI
         }
         $groups = (new GroupsFunctions($this->context->dbDriver))->getGroups(array('in' => $feature->visibility));
 
- 
         foreach ($groups as $group) {
             $canUpdateInGroup = $this->user->hasRightsTo(RestoGroup::updateItemRight($group['name']));
             if ($canUpdateInGroup) {
@@ -716,15 +713,6 @@ class FeaturesAPI
             }
         }
         RestoLogUtil::httpError(403, 'Insufficient rights to update an item');
-
-
-
-        
-
-        // Specifically set splitGeometry
-        $params['_splitGeom'] = isset($params['_splitGeom']) && filter_var($params['_splitGeom'], FILTER_VALIDATE_BOOLEAN) === false ? false : $this->context->core["splitGeometryOnDateLine"];
-
-        return $collection->model->updateFeature($feature, $collection, $body, $params);
     }
 
     /**
@@ -936,11 +924,31 @@ class FeaturesAPI
             RestoLogUtil::httpError(403);
         }
 
-        $result = (new FeaturesFunctions($this->context->dbDriver))->removeFeature($feature);
 
-        return RestoLogUtil::success('Feature deleted', array(
-            'featureId' => $feature->id,
-            'catalogsUpdated' => $result['catalogsUpdated']
-        ));
+        if ($this->user->hasRightsTo(RestoUser::DELETE_ITEM, array('item' => $feature))) {
+            $result = (new FeaturesFunctions($this->context->dbDriver))->removeFeature($feature);
+
+            return RestoLogUtil::success('Feature deleted', array(
+                'featureId' => $feature->id,
+                'catalogsUpdated' => $result['catalogsUpdated']
+            ));
+        }
+        if (empty($feature->visibility)) {
+            RestoLogUtil::httpError(403, 'No visibility');
+        }
+        $groups = (new GroupsFunctions($this->context->dbDriver))->getGroups(array('in' => $feature->visibility));
+
+        foreach ($groups as $group) {
+            $canDeleteInGroup = $this->user->hasRightsTo(RestoGroup::deleteItemRight($group['name']));
+            if ($canDeleteInGroup) {
+                $result = (new FeaturesFunctions($this->context->dbDriver))->removeFeature($feature);
+
+                return RestoLogUtil::success('Feature deleted', array(
+                    'featureId' => $feature->id,
+                    'catalogsUpdated' => $result['catalogsUpdated']
+                ));
+            }
+        }
+        RestoLogUtil::httpError(403, 'Insufficient rights to delete an item');
     }
 }

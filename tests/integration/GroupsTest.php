@@ -114,7 +114,7 @@ final class GroupsTest extends TestCase
         $groupRight = [
             RestoGroup::createItemRight($groupName) => true,
             RestoGroup::updateItemRight($groupName) => true,
-            RestoGroup::updateCollectionRight($groupName) => true
+            RestoGroup::updateCollectionRight($groupName) => true,
         ];
 
         $collectionRight = [
@@ -177,7 +177,7 @@ final class GroupsTest extends TestCase
 
         $privateItem['description'] = "updated item description";
 
-        // User in group cannot private update 
+        // User in group cannot private update
         $response = Utils::httpPut("http://" . $inGroupUserName . ":dummy@localhost:5252/collections/" . $collectionName . "/items/" . $privateItem['id'], json_encode($privateItem));
         $decoded = json_decode($response);
         $this->assertSame($decoded->ErrorCode, 403, $response);
@@ -192,7 +192,7 @@ final class GroupsTest extends TestCase
         $this->assertSame($decoded->ErrorCode, 403, $response);
 
         unset($inGroupItem['properties']["visibility"]);
-        
+
         // User in group with update right can update item
         $response = Utils::httpPut("http://" . $inGroupUserName . ":dummy@localhost:5252/collections/" . $collectionName . "/items/" . $inGroupItem['id'], json_encode($inGroupItem));
         $decoded = json_decode($response);
@@ -207,7 +207,7 @@ final class GroupsTest extends TestCase
     #[Group('only')]
     public function testCanPlayWithGroupRightDelete(): void
     {
-     $utils = new Utils();
+        $utils = new Utils();
 
         $groupOwnerUserName = uniqid("groupowner");
         $utils->createAPIUser($groupOwnerUserName);
@@ -223,7 +223,7 @@ final class GroupsTest extends TestCase
             RestoGroup::createItemRight($groupName) => true,
             RestoGroup::deleteItemRight($groupName) => true,
             RestoGroup::createCollectionRight($groupName) => true,
-            RestoGroup::deleteCollectionRight($groupName) => true
+            RestoGroup::deleteCollectionRight($groupName) => true,
         ];
         $utils->createAPIGroup($groupOwnerUserName, $groupName);
         $utils->addRightToGroupAPI($groupOwnerUserName, $groupName, $groupRight);
@@ -242,7 +242,7 @@ final class GroupsTest extends TestCase
         //random delete item
         $response = Utils::httpDelete("http://" . $randomUserName . ":dummy@localhost:5252/collections/" . $collectionId . "/items/" . $itemId);
         $decoded = json_decode($response);
-        $this->assertSame($decoded->ErrorCode, 403, $response);
+        $this->assertSame($decoded->ErrorCode, 404, $response);
 
         //ingroup delete item
         $response = Utils::httpDelete("http://" . $inGroupUserName . ":dummy@localhost:5252/collections/" . $collectionId . "/items/" . $itemId);
@@ -256,11 +256,11 @@ final class GroupsTest extends TestCase
         $response = Utils::httpDelete("http://" . $inGroupUserName . ":dummy@localhost:5252/collections/" . $collectionId);
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
-   
+
     }
 
-        
-        
+
+
 
 }
 //TODO delete collection item

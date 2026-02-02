@@ -36,6 +36,19 @@ final class Utils extends Assert
         return $response;
     }
 
+    public static function httpDelete(string $url): string|bool
+    {
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+        $result = curl_exec($curl);
+        curl_close($curl);
+
+        return $result;
+    }
+
     public static function httpGet(string $url): string
     {
         return Utils::httpGetWithHeader($url, '');
@@ -75,7 +88,7 @@ final class Utils extends Assert
         $this->assertSame($decoded->status, "success", $response);
     }
 
-     public function addRightToGroupAPI(string $ownerName, string $groupName, array $rights): void
+    public function addRightToGroupAPI(string $ownerName, string $groupName, array $rights): void
     {
         $response = Utils::httpPost("http://" . $ownerName . ":dummy@localhost:5252/groups/" . $groupName . "/rights", json_encode($rights));
         $decoded = json_decode($response);
@@ -160,9 +173,9 @@ final class Utils extends Assert
     public static function item(string $itemName, array $visibility): array
     {
         $value = [
-                "datetime" => "2024-06-21T16:27:00Z",
-                "description" => "This is test item" ,
-            ];
+            "datetime" => "2024-06-21T16:27:00Z",
+            "description" => "This is test item" ,
+        ];
         if ($visibility) {
             $value['visibility'] = $visibility;
         }
@@ -170,18 +183,18 @@ final class Utils extends Assert
         return [
             "id" => $itemName,
             "type" => "Feature",
-            "properties" =>$value,
+            "properties" => $value,
             "geometry" => [
                 "coordinates" => [
                     [
                         [-64.8,              32.3],
                         [-65.5,              18.3],
                         [-80.3,              25.2],
-                        [-64.8,              32.3]
-                    ]
+                        [-64.8,              32.3],
+                    ],
                 ],
-                "type" => "Polygon"
-            ]
+                "type" => "Polygon",
+            ],
         ];
 
     }
@@ -206,4 +219,5 @@ final class Utils extends Assert
             "catalogs" => "{}",
         ];
     }
+
 }
