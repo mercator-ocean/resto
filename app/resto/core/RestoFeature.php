@@ -400,6 +400,13 @@ class RestoFeature
      */
     private $featureArray;
 
+
+    /*
+    * Feature visibility
+    * TODO 2026-02-02: does this means it is visible in the API?
+    */
+    public $visibility;
+
     /**
      * Constructor
      *
@@ -517,5 +524,6 @@ class RestoFeature
         }
         
         $this->id = $this->featureArray['id'];
+        $this->visibility = $this->featureArray['properties']['visibility'];
     }
 }

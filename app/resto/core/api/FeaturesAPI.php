@@ -686,14 +686,40 @@ class FeaturesAPI
             'featureId' => $params['featureId'],
             'collection' => $collection
         ));
+        error_log("Feature" . json_encode($feature));
 
         if (!$feature->isValid()) {
             RestoLogUtil::httpError(404);
         }
 
-        if (!$this->user->hasRightsTo(RestoUser::UPDATE_ITEM, array('item' => $feature))) {
-            RestoLogUtil::httpError(403);
+        if ($this->user->hasRightsTo(RestoUser::UPDATE_ITEM, array('item' => $feature))) {
+            // Specifically set splitGeometry
+            $params['_splitGeom'] = isset($params['_splitGeom']) && filter_var($params['_splitGeom'], FILTER_VALIDATE_BOOLEAN) === false ? false : $this->context->core["splitGeometryOnDateLine"];
+            return $collection->model->updateFeature($feature, $collection, $body, $params);
         }
+        error_log("TOTO".$body["description"]." ".json_encode($body['visibility']));
+        if (isset($body['properties']['visibility'])) {
+            RestoLogUtil::httpError(403, 'Forbidden to update item visibility');
+        }
+        if (empty($feature->visibility)) {
+            RestoLogUtil::httpError(403, 'No visibility');
+        }
+        $groups = (new GroupsFunctions($this->context->dbDriver))->getGroups(array('in' => $feature->visibility));
+
+ 
+        foreach ($groups as $group) {
+            $canUpdateInGroup = $this->user->hasRightsTo(RestoGroup::updateItemRight($group['name']));
+            if ($canUpdateInGroup) {
+                // Specifically set splitGeometry
+                $params['_splitGeom'] = isset($params['_splitGeom']) && filter_var($params['_splitGeom'], FILTER_VALIDATE_BOOLEAN) === false ? false : $this->context->core["splitGeometryOnDateLine"];
+                return $collection->model->updateFeature($feature, $collection, $body, $params);
+            }
+        }
+        RestoLogUtil::httpError(403, 'Insufficient rights to update an item');
+
+
+
+        
 
         // Specifically set splitGeometry
         $params['_splitGeom'] = isset($params['_splitGeom']) && filter_var($params['_splitGeom'], FILTER_VALIDATE_BOOLEAN) === false ? false : $this->context->core["splitGeometryOnDateLine"];
