@@ -204,7 +204,6 @@ final class GroupsTest extends TestCase
         $this->assertSame($decoded->ErrorCode, 404, $response);
     }
 
-    #[Group('only')]
     public function testCanPlayWithGroupRightDelete(): void
     {
         $utils = new Utils();
@@ -256,11 +255,83 @@ final class GroupsTest extends TestCase
         $response = Utils::httpDelete("http://" . $inGroupUserName . ":dummy@localhost:5252/collections/" . $collectionId);
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
+    }
+
+    #[Group('only')]
+    public function testCanManageCatalogWithGroupRight(): void
+    {
+        $utils = new Utils();
+        $groupOwnerUserName = uniqid("groupowner");
+        $utils->createAPIUser($groupOwnerUserName);
+
+        $inGroupUserName = uniqid("useringroup");
+        $utils->createAPIUser($inGroupUserName);
+
+        $randomUserName = uniqid("lequentin");
+        $utils->createAPIUser($randomUserName);
+
+        $groupName = uniqid("catalogManagementGroup");
+        $groupRight = [
+            RestoGroup::createCatalogRight($groupName) => true,
+            RestoGroup::updateCatalogRight($groupName) => true,
+            RestoGroup::deleteCatalogRight($groupName) => true,
+        ];
+        $utils->createAPIGroup($groupOwnerUserName, $groupName);
+        $utils->addRightToGroupAPI($groupOwnerUserName, $groupName, $groupRight);
+        $utils->addUserToGroupAPI($groupOwnerUserName, $groupName, $inGroupUserName);
+
+        //create catalog
+        $catalogId =  uniqid("catalog");
+        $catalog = Utils::catalog($catalogId, [$groupName]);
+        $response = Utils::httpPost("http://" . $groupOwnerUserName . ":dummy@localhost:5252/catalogs/projects", json_encode($catalog));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+
+        //inuser create catalog
+        $inUserCatalogId =  uniqid("inusercatalog");
+        $inUserCatalog = Utils::catalog($inUserCatalogId, [$groupName]);
+        $response = Utils::httpPost("http://" . $inGroupUserName . ":dummy@localhost:5252/catalogs/projects", json_encode($inUserCatalog));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+
+        //random create catalog
+        $randomUserCatalogId =  uniqid("randomusercatalog");
+        $randomUserCatalog = Utils::catalog($randomUserCatalogId, [$groupName]);
+        $response = Utils::httpPost("http://" . $randomUserName . ":dummy@localhost:5252/catalogs/projects", json_encode($randomUserCatalog));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->ErrorCode, 403, $response);
+
+        //update catalog 
+        $catalog['description'] = "updated description";
+        unset($catalog["visibility"]);
+        $response = Utils::httpPut("http://" . $inGroupUserName . ":dummy@localhost:5252/catalogs/projects/" . $catalogId, json_encode($catalog));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+
+        //random update catalog
+        $catalog['description'] = "unauthorized updated description";
+        $response = Utils::httpPut("http://" . $randomUserName . ":dummy@localhost:5252/catalogs/projects/" . $catalogId, json_encode($catalog));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->ErrorCode, 403, $response);
+
+        //random user delete catalog
+        $response = Utils::httpDelete("http://" . $randomUserName . ":dummy@localhost:5252/catalogs/projects/" . $catalogId);
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->ErrorCode, 403, $response);
+
+        //in group user delete catalog
+        $response = Utils::httpDelete("http://" . $inGroupUserName . ":dummy@localhost:5252/catalogs/projects/" . $catalogId);
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
 
     }
 
+    //Create  catalog with group right
 
-
+    // Update catalog with group right
+    // Delete catalog with group right
+    //Catalog test
+    //check creation outiside of 'projects' and 'users' catalogs
+    //catalog creation creates collection even without collection right?! type=collection...
 
 }
-//TODO delete collection item

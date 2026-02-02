@@ -147,6 +147,28 @@ final class Utils extends Assert
             "description" => "Any user can create a group.",
         ];
     }
+
+    /**
+     * @return array<string,string>
+     * @param array<string> $visibility
+     */
+    public static function catalog(string $catalogName, array $visibility): array
+    {
+        $value = [
+            "id" => $catalogName,
+            "type" => "Catalog",
+            "title" => $catalogName,
+            "description" => "This is a simple catalog.",
+            "stac_version" => "1.0.0",
+
+        ];
+
+        if ($visibility) {
+            $value['visibility'] = $visibility;
+        }
+        return $value;
+    }
+
     /**
      * @return array<string,string>
      * @param array<string> $visibility
@@ -174,7 +196,7 @@ final class Utils extends Assert
     {
         $value = [
             "datetime" => "2024-06-21T16:27:00Z",
-            "description" => "This is test item" ,
+            "description" => "This is test item",
         ];
         if ($visibility) {
             $value['visibility'] = $visibility;
@@ -196,7 +218,6 @@ final class Utils extends Assert
                 "type" => "Polygon",
             ],
         ];
-
     }
     /**
      * @return array<string,mixed>
@@ -219,5 +240,4 @@ final class Utils extends Assert
             "catalogs" => "{}",
         ];
     }
-
 }

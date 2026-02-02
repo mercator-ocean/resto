@@ -74,5 +74,5 @@ final class CollectionsTest extends TestCase
     }
 
          //Collection test 
-        // delete collection with item?
+        // TODO: delete collection with item inside
 }
