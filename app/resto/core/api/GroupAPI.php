@@ -276,8 +276,8 @@ class GroupAPI
         if (isset($body['owner']) && !$this->user->hasGroup(RestoConstants::GROUP_ADMIN_ID)) {
             RestoLogUtil::httpError(403, 'You are not allowed to set property "owner"');
         }
-        // FIXME ADD CONFIGURATION Option
-        if (isset($this->user->profile['externalidp'])) {
+
+        if ($this->context->core['automaticGroupCreationFromIdp']) {
             RestoLogUtil::httpError(403, 'You are not allowed to create a group when connecting through external identity provider, ask an administrator');
         }
         // Force owner to POSTING user
