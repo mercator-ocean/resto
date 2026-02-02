@@ -403,7 +403,6 @@ class RestoFeature
 
     /*
     * Feature visibility
-    * TODO 2026-02-02: does this means it is visible in the API?
     */
     public $visibility;
 
