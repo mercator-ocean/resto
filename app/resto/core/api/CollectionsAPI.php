@@ -626,8 +626,6 @@ class CollectionsAPI
          * Load collection
          */
         $collection = $this->context->keeper->getRestoCollection($params['collectionId'], $this->user)->load();
-        error_log('collection to create item from');
-        error_log(json_encode($collection->visibility));
 
         if (!$this->user->hasRightsTo(RestoUser::CREATE_ITEM, array('collection' => $collection))) {
             if (empty($collection->visibility)) {

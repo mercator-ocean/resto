@@ -287,8 +287,6 @@ class RestoUser
     {
 
         $rights = $this->getRights();
-        error_log("On récupère les droits " . $action);
-        error_log(json_encode($rights));
         
         /*
          * 1) Handle actions that are not known
@@ -581,8 +579,6 @@ class RestoUser
      */
     private function handleSimpleRights($action, $rights, $params)
     {
-        error_log('Simple rights ' . $action . '$rights[$action] ');
-        error_log($rights[$action]??false ? 'droits true':'droits false' );
         switch ($action) {
 
             case RestoUser::CREATE_CATALOG:
