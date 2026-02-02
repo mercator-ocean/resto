@@ -72,4 +72,7 @@ final class CollectionsTest extends TestCase
         $decoded = json_decode($response);
         $this->assertSame($decoded->ErrorMessage, "updateCollection - Forbidden", $response);
     }
+
+         //Collection test 
+        // delete collection with item?
 }

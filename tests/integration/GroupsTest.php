@@ -204,6 +204,54 @@ final class GroupsTest extends TestCase
         $this->assertSame($decoded->ErrorCode, 404, $response);
     }
 
+    #[Group('only')]
+    public function testCanPlayWithGroupRightDelete(): void
+    {
+     $utils = new Utils();
+
+        $groupOwnerUserName = uniqid("groupowner");
+        $utils->createAPIUser($groupOwnerUserName);
+
+        $inGroupUserName = uniqid("useringroup");
+        $utils->createAPIUser($inGroupUserName);
+
+        $randomUserName = uniqid("lequentin");
+        $utils->createAPIUser($randomUserName);
+
+        $groupName = uniqid("itemCreationGroup");
+        $groupRight = [
+            RestoGroup::createItemRight($groupName) => true,
+            RestoGroup::deleteItemRight($groupName) => true,
+            RestoGroup::createCollectionRight($groupName) => true,
+            RestoGroup::deleteCollectionRight($groupName) => true
+        ];
+        $utils->createAPIGroup($groupOwnerUserName, $groupName);
+        $utils->addRightToGroupAPI($groupOwnerUserName, $groupName, $groupRight);
+        $utils->addUserToGroupAPI($groupOwnerUserName, $groupName, $inGroupUserName);
+
+        //create colelciton
+        $collectionId =  uniqid("collection");
+        $collection = Utils::collection($collectionId, [$groupName]);
+        $utils->createCollectionAPI($groupOwnerUserName, $collection);
+
+        $itemId = uniqid("item");
+        $item = Utils::item($itemId, [$groupName]);
+        $utils->createItemAPI($groupOwnerUserName, $collectionId, $item);
+
+
+        //random delete item
+        $response = Utils::httpDelete("http://" . $randomUserName . ":dummy@localhost:5252/collections/" . $collectionId . "/items/" . $itemId);
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->ErrorCode, 403, $response);
+
+        //ingroup delete item
+        //random delete collection
+        //ingroup delete collection
+   
+    }
+
+        
+        
 
 }
 //TODO delete collection item

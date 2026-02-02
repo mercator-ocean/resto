@@ -74,6 +74,14 @@ final class Utils extends Assert
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
     }
+
+     public function addRightToGroupAPI(string $ownerName, string $groupName, array $rights): void
+    {
+        $response = Utils::httpPost("http://" . $ownerName . ":dummy@localhost:5252/groups/" . $groupName . "/rights", json_encode($rights));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+    }
+
     /**
      * @param array<int,mixed> $collection
      */
