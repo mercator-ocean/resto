@@ -324,6 +324,13 @@ final class GroupsTest extends TestCase
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
 
+        //cannot create collection in route catalog without right
+        $catalog['type'] = 'Collection';
+        $catalog['visibility'] = [$groupName];
+        $response = Utils::httpPost("http://" . $inGroupUserName . ":dummy@localhost:5252/catalogs/projects", json_encode($catalog));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->ErrorCode, 403, $response);
+
     }
 
     //Create  catalog with group right

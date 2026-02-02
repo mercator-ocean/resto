@@ -400,10 +400,15 @@ class STACAPI
             if (empty($body['visibility'])) {
                 RestoLogUtil::httpError(403);
             }
+            $isCollection = $body['type'] === 'Collection';
             foreach ($body['visibility'] as $group) {
+                
                 $canCreateInGroup = $this->user->hasRightsTo(RestoGroup::createCatalogRight($group));
                 if (!$canCreateInGroup) {
                     RestoLogUtil::httpError(403);
+                }
+                if ($isCollection && !$this->user->hasRightsTo(RestoGroup::createCollectionRight($group))) {
+                    RestoLogUtil::httpError(403, "No right to create collection in catalogs");
                 }
             }
         }
@@ -459,7 +464,6 @@ class STACAPI
         /*
          * [IMPORTANT] Special case - post a collection under a catalog is in fact an update of 'links' property of this catalog
          */
-        //TODO: wtf
         if ($body['type'] === 'Collection') {
 
             // Collection does not exist - created first
