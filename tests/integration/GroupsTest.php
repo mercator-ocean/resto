@@ -251,7 +251,7 @@ final class GroupsTest extends TestCase
         //random delete collection
         $response = Utils::httpDelete("http://" . $randomUserName . ":dummy@localhost:5252/collections/" . $collectionId);
         $decoded = json_decode($response);
-        $this->assertSame($decoded->ErrorCode, 403, $response);
+        $this->assertSame($decoded->ErrorCode, 404, $response);
         //ingroup delete collection
         $response = Utils::httpDelete("http://" . $inGroupUserName . ":dummy@localhost:5252/collections/" . $collectionId);
         $decoded = json_decode($response);

@@ -469,13 +469,24 @@ class CollectionsAPI
     {
         $collection = $this->context->keeper->getRestoCollection($params['collectionId'], $this->user)->load();
 
-        if (!$this->user->hasRightsTo(RestoUser::DELETE_COLLECTION, array('collection' => $collection))) {
-            RestoLogUtil::httpError(403);
+        if ($this->user->hasRightsTo(RestoUser::DELETE_COLLECTION, array('collection' => $collection))) {
+            (new CollectionsFunctions($this->context->dbDriver))->removeCollection($collection, $this->context->core['baseUrl']);
+
+            return RestoLogUtil::success('Collection ' . $collection->id . ' deleted');
         }
+        if (empty($collection->visibility)) {
+            RestoLogUtil::httpError(403, 'No visibility');
+        }
+        $groups = (new GroupsFunctions($this->context->dbDriver))->getGroups(array('in' => $collection->visibility));
 
-        (new CollectionsFunctions($this->context->dbDriver))->removeCollection($collection, $this->context->core['baseUrl']);
-
-        return RestoLogUtil::success('Collection ' . $collection->id . ' deleted');
+        foreach ($groups as $group) {
+            $canDeleteInGroup = $this->user->hasRightsTo(RestoGroup::deleteItemRight($group['name']));
+            if ($canDeleteInGroup) {
+                (new CollectionsFunctions($this->context->dbDriver))->removeCollection($collection, $this->context->core['baseUrl']);
+                return RestoLogUtil::success('Collection ' . $collection->id . ' deleted');
+            }
+        }
+        RestoLogUtil::httpError(403, 'Insufficient rights to delete a collection');
     }
 
     /**

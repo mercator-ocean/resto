@@ -920,11 +920,6 @@ class FeaturesAPI
             RestoLogUtil::httpError(404);
         }
 
-        if (!$this->user->hasRightsTo(RestoUser::DELETE_ITEM, array('item' => $feature))) {
-            RestoLogUtil::httpError(403);
-        }
-
-
         if ($this->user->hasRightsTo(RestoUser::DELETE_ITEM, array('item' => $feature))) {
             $result = (new FeaturesFunctions($this->context->dbDriver))->removeFeature($feature);
 
