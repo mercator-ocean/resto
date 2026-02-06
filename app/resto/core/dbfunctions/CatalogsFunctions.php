@@ -677,7 +677,7 @@ class CatalogsFunctions
             if ( isset($catalog['id']) && strpos($catalog['id'], 'users/') === 0 ) {
                 $createdCatalogIsPublic = false;
             }
-            $catalog['visibility'] = RestoUtil::getDefaultVisibility($user, $createdCatalogIsPublic);
+            $catalog['visibility'] = RestoUtil::getDefaultVisibility($user, $createdCatalogIsPublic, $this->context->core['canSwitchVisibilityToPublic']);
         }
         $insert = '(id, title, description, level, counters, owner, visibility, rtype, properties, stac_url, pinned, created) SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now()';
         $values = array(

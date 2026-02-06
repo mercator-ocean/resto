@@ -96,6 +96,16 @@ final class Utils extends Assert
     }
 
     /**
+     * @param array<int,mixed> $catalog
+     */
+    public function createCatalogAPI(string $ownerName, array $catalog): void
+    {
+        $response = Utils::httpPost("http://" . $ownerName . ":dummy@localhost:5252/catalogs/projects", json_encode($catalog));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+    }
+    
+    /**
      * @param array<int,mixed> $collection
      */
     public function createCollectionAPI(string $ownerName, array $collection): void

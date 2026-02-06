@@ -369,7 +369,6 @@ class STACAPI
      */
     public function addCatalog($params, $body)
     {
-
         /*
          * Check that parent catalogs exists
          */
@@ -386,7 +385,6 @@ class STACAPI
                 }
             }
         }
-
         /*
          * Compute internal catalog id as full path
          */

@@ -257,7 +257,6 @@ final class GroupsTest extends TestCase
         $this->assertSame($decoded->status, "success", $response);
     }
 
-    #[Group('only')]
     public function testCanManageCatalogWithGroupRight(): void
     {
         $utils = new Utils();
