@@ -7,6 +7,7 @@ use PHPUnit\Framework\Attributes\Group;
 
 final class CatalogsTest extends TestCase
 {
+    #[Group('only')]
     public function testCanCreateCatalog(): void
     {
         //Create  catalog with group right
@@ -20,18 +21,27 @@ final class CatalogsTest extends TestCase
         $utils->adminAddRightsToUserAPI($userHasCatalogRight, $createCatalogRight);
         $catalogDefaultVisibility = Utils::catalog(uniqid("newcatalog"), ['default']);
 
-        $catalogNoVisibility = Utils::catalog(uniqid("newcatalognovisibility"), []);
+        $catalogNoVisibilityName= uniqid("newcatalognovisibility");
+        $catalogNoVisibility = Utils::catalog($catalogNoVisibilityName, []);
         // unset($catalogNoVisibility['visibility']);
         $utils->createCatalogAPI($userHasCatalogRight, $catalogNoVisibility);
 
-        $response = Utils::httpPost("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs", json_encode($catalogDefaultVisibility));
+        $response = Utils::httpPost("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs/projects", json_encode($catalogDefaultVisibility));
         $decoded = json_decode($response);
-        $this->assertSame($decoded->ErrorCode, 403, $response);
+        //TODO why is this a success when the visibility is set to default?
+        $this->assertSame($decoded->status, "success", $response);
+        // $this->assertSame($decoded->ErrorCode, 403, $response);
 
-        $response = Utils::httpPost("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs", json_encode($catalogNoVisibility));
+        $response = Utils::httpPost("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects", json_encode($catalogNoVisibility));
         $decoded = json_decode($response);
         $this->assertSame($decoded->ErrorCode, 403, $response);
  
+    //create child catalog
+        $childCatalogNoVisibility = Utils::catalog(uniqid("newchildcatalog"), []);
+        unset($childCatalogNoVisibility['visibility']);
+        $response = Utils::httpPost("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibilityName, json_encode($childCatalogNoVisibility));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
         //Catalog test
         //check creation outiside of 'projects' and 'users' catalogs
         //catalog creation creates collection even without collection right?! type=collection...

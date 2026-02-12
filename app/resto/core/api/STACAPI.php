@@ -396,7 +396,7 @@ class STACAPI
          */
         if (!$this->user->hasRightsTo(RestoUser::CREATE_CATALOG, array('catalog' => $body))) {
             if (empty($body['visibility'])) {
-                RestoLogUtil::httpError(403);
+                RestoLogUtil::httpError(403, "No visibility set for catalog and you don't have global right to create catalog");
             }
             $isCollection = $body['type'] === 'Collection';
             foreach ($body['visibility'] as $group) {

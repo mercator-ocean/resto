@@ -22,9 +22,6 @@ final class ItemsTest extends TestCase
         $collectionNoVisibility = Utils::collection($collectionName, []);
         $utils->createCollectionAPI($userHasItemRight, $collectionNoVisibility);
 
-        $catalogName = uniqid("newcatalog");
-        $catalogNoVisibility = Utils::catalog($catalogName, []);
-        $utils->createCatalogAPI($userHasItemRight, $catalogNoVisibility);
 
         $itemDefaultVisibility = Utils::item(uniqid("newitem"), ['default']);
 
@@ -40,10 +37,16 @@ final class ItemsTest extends TestCase
         $decoded = json_decode($response);
         $this->assertSame($decoded->ErrorCode, 404, $response);
 
-        //TODO
         //add item to catalog
+        $catalogName = uniqid("newcatalog");
+        $catalogNoVisibility = Utils::catalog($catalogName, []);
+        $utils->createCatalogAPI($userHasItemRight, $catalogNoVisibility);
 
-        //check creation in non existing collection
-        //check creation with non existing catalog in collection path
+        $response = Utils::httpPost("http://" . $userHasItemRight . ":dummy@localhost:5252/catalogs/projects/" . $catalogName . "/items", json_encode($itemNoVisibility));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+
+
+
     }
 }
