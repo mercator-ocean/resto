@@ -400,7 +400,7 @@ class STACAPI
             }
             $isCollection = $body['type'] === 'Collection';
             foreach ($body['visibility'] as $group) {
-                
+
                 $canCreateInGroup = $this->user->hasRightsTo(RestoGroup::createCatalogRight($group));
                 if (!$canCreateInGroup) {
                     RestoLogUtil::httpError(403);
@@ -421,6 +421,13 @@ class STACAPI
             }
             if (!$this->catalogsFunctions->canSeeCatalog($body['visibility'], $this->user, true)) {
                 RestoLogUtil::httpError(403, 'You are not allowed to set the visibility to a group you are not part of');
+            }
+
+            if (!$this->context->core['anyoneCanSwitchVisibilityToPublic'] && in_array(RestoConstants::GROUP_DEFAULT_ID, $body['visibility'])) {
+                $isAdmin = $this->user->hasGroup(RestoConstants::GROUP_ADMIN_ID);
+                if (!$isAdmin) {
+                    RestoLogUtil::httpError(403, 'You are not allowed to set the visibility of the default group');
+                }
             }
         }
 
@@ -1506,7 +1513,6 @@ class STACAPI
 
         // The path is the catalog identifier
         $parentAndChilds = $this->getParentAndChilds($catalogs, $params);
-
         if ($parentAndChilds['parent']['visibility']) {
             $canSee = false;
             for ($i = count($parentAndChilds['parent']['visibility']); $i--;) {

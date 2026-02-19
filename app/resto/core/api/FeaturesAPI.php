@@ -68,8 +68,8 @@ class FeaturesAPI
      *              type="string"
      *          ),
      *          description="Comma separated list of property fields to be returned. The following reserved keywords can also be used:
-* _all: Return all properties (This is the default)
-* _simple: Return all fields except *keywords* property"
+     * _all: Return all properties (This is the default)
+     * _simple: Return all fields except *keywords* property"
      *      ),
      *      @OA\Response(
      *          response="200",
@@ -106,7 +106,7 @@ class FeaturesAPI
 
         return $feature;
     }
-        
+
     /**
      * Search for features in a given collections
      *
@@ -129,12 +129,12 @@ class FeaturesAPI
      *          in="query",
      *          style="form",
      *          description="Free text search - OpenSearch {searchTerms}. Can include hashtags i.e. text starting with *#* characters. In this case, use the following:
-* *#cryosphere* will search for *cryosphere*
-* *#cryosphere #atmosphere* will search for *cryosphere* AND *atmosphere*
-* *#cryosphere|atmosphere* will search for *cryosphere* OR *atmosphere*
-* *#cryosphere!* will search for *cryosphere* OR any *broader* concept of *cryosphere* ([EXTENSION][SKOS])
-* *#cryosphere\** will search for *cryosphere* OR any *narrower* concept of *cryosphere* ([EXTENSION][SKOS])
-* *#cryosphere~* will search for *cryosphere* OR any *related* concept of *cryosphere* ([EXTENSION][SKOS])",
+     * *#cryosphere* will search for *cryosphere*
+     * *#cryosphere #atmosphere* will search for *cryosphere* AND *atmosphere*
+     * *#cryosphere|atmosphere* will search for *cryosphere* OR *atmosphere*
+     * *#cryosphere!* will search for *cryosphere* OR any *broader* concept of *cryosphere* ([EXTENSION][SKOS])
+     * *#cryosphere\** will search for *cryosphere* OR any *narrower* concept of *cryosphere* ([EXTENSION][SKOS])
+     * *#cryosphere~* will search for *cryosphere* OR any *related* concept of *cryosphere* ([EXTENSION][SKOS])",
      *          required=false,
      *          @OA\Schema(
      *              type="string"
@@ -681,7 +681,7 @@ class FeaturesAPI
     {
         // Load collection
         $collection = $this->context->keeper->getRestoCollection($params['collectionId'], $this->user)->load();
-        
+
         $feature = new RestoFeature($this->context, $this->user, array(
             'featureId' => $params['featureId'],
             'collection' => $collection
@@ -807,7 +807,7 @@ class FeaturesAPI
         if (!$this->user->hasRightsTo(RestoUser::UPDATE_ITEM, array('item' => $feature))) {
             RestoLogUtil::httpError(403);
         }
-        
+
         // A value key is mandatory
         $allowed = array('title', 'description', 'visibility', 'owner', 'status');
         foreach (array_keys($body) as $property) {
@@ -822,16 +822,22 @@ class FeaturesAPI
             }
 
             // Convert visibility from names to ids
-            if ( $property === 'visibility' && isset($body[$property]) ) {
+            if ($property === 'visibility' && isset($body[$property])) {
                 $body[$property] = (new GeneralFunctions($this->context->dbDriver))->visibilityNamesToIds($body[$property]);
-                if ( empty($body[$property]) ) {
-                    RestoLogUtil::httpError(400, 'Visibility is set but either emtpy or referencing an unknown group'); 
+                if (empty($body[$property])) {
+                    RestoLogUtil::httpError(400, 'Visibility is set but either emtpy or referencing an unknown group');
                 }
-                if ( !(new CatalogsFunctions($this->context->dbDriver))->canSeeCatalog($body[$property], $this->user, true) ) {
+                if (!(new CatalogsFunctions($this->context->dbDriver))->canSeeCatalog($body[$property], $this->user, true)) {
                     RestoLogUtil::httpError(403, 'You are not allowed to set the visibility to a group you are not part of');
                 }
-            }
 
+                if (!$this->context->core['anyoneCanSwitchVisibilityToPublic'] && in_array(RestoConstants::GROUP_DEFAULT_ID, $body['visibility'])) {
+                    $isAdmin = $this->user->hasGroup(RestoConstants::GROUP_ADMIN_ID);
+                    if (!$isAdmin) {
+                        RestoLogUtil::httpError(403, 'You are not allowed to set the visibility of the default group');
+                    }
+                }
+            }
         }
 
         return (new FeaturesFunctions($this->context->dbDriver))->updateFeatureProperties($feature, $body, $this->context, $this->user);

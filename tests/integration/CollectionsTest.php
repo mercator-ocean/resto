@@ -65,7 +65,6 @@ final class CollectionsTest extends TestCase
         $this->assertSame($decoded->ErrorCode, 404, $response);
     }
 
-    #[Group('only')]
     public function testCanDeleteCollection(): void
     {
         $utils = new Utils();

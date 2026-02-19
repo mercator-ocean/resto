@@ -52,9 +52,6 @@ class RestoContext
 
         // Display collection that have at least 'collectionMinMatch' object
         'collectionMinMatch' => 0,
-        
-        // Allow users to change the visibility to public
-        'canSwitchVisibilityToPublic' => true,
 
         // Count catalogs
         'countCatalogs' => false,

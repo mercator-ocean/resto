@@ -571,12 +571,12 @@ class RestoUtil
      * @param RestoUser $user
      * @param boolean $createdResourceIsPublic
      */
-    public static function getDefaultVisibility($user, $createdResourceIsPublic, $canSwitchVisibilityToPublic)
+    public static function getDefaultVisibility($user, $createdResourceIsPublic, $anyoneCanSwitchVisibilityToPublic)
     {
-        if ($canSwitchVisibilityToPublic){
+        if ($anyoneCanSwitchVisibilityToPublic){
             return array();
         }
-        if ( !$createdResourceIsPublic ) {
+        if ( !$createdResourceIsPublic || !$anyoneCanSwitchVisibilityToPublic) {
             $ownedGroups = $user->getOwnedGroups();
             for ($i = 0, $ii = count($ownedGroups); $i < $ii; $i++) {
                 if ( $ownedGroups[$i]['private'] === "1" ) {

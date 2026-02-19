@@ -7,7 +7,6 @@ use PHPUnit\Framework\Attributes\Group;
 
 final class CatalogsTest extends TestCase
 {
-    #[Group('only')]
     public function testCanCreateCatalog(): void
     {
         //Create  catalog with group right
@@ -21,30 +20,42 @@ final class CatalogsTest extends TestCase
         $utils->adminAddRightsToUserAPI($userHasCatalogRight, $createCatalogRight);
         $catalogDefaultVisibility = Utils::catalog(uniqid("newcatalog"), ['default']);
 
-        $catalogNoVisibilityName= uniqid("newcatalognovisibility");
+        $catalogNoVisibilityName = uniqid("newcatalognovisibility");
         $catalogNoVisibility = Utils::catalog($catalogNoVisibilityName, []);
-        // unset($catalogNoVisibility['visibility']);
-        $utils->createCatalogAPI($userHasCatalogRight, $catalogNoVisibility);
+        unset($catalogNoVisibility['visibility']);
 
+        //not allowed to create catalog outside of /projects and /users
+        $response = Utils::httpPost("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs", json_encode($catalogNoVisibility));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->ErrorMessage, "addCatalog - No visibility set for catalog and you don't have global right to create catalog", $response); //TODO is this the right error ?
+
+        //Create catalog without visibility under /projects with user with right to create catalog, the default visibility should be applied, in this case the user private group   
+        $utils->createCatalogAPI($userHasCatalogRight, $catalogNoVisibility);
+        $response = Utils::httpGet("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibilityName);
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->title, $catalogNoVisibility['title'], $response);
+
+        //Create catalog with default visibility, should return error because the user doesn't have the right to set default visibility
         $response = Utils::httpPost("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs/projects", json_encode($catalogDefaultVisibility));
         $decoded = json_decode($response);
-        //TODO why is this a success when the visibility is set to default?
-        $this->assertSame($decoded->status, "success", $response);
-        // $this->assertSame($decoded->ErrorCode, 403, $response);
+        $this->assertSame($decoded->ErrorMessage, "addCatalog - You are not allowed to set the visibility of the default group", $response);
 
+        //not allowed to get private catalog if you don't have the right to see it
+        $response = Utils::httpGet("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibilityName);
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->ErrorMessage, "processPath - You are not allowed to access this catalog", $response);
+
+        //not allowed to create catalog without visibility if you don't have the right to create catalog
         $response = Utils::httpPost("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects", json_encode($catalogNoVisibility));
         $decoded = json_decode($response);
-        $this->assertSame($decoded->ErrorCode, 403, $response);
- 
-    //create child catalog
+        $this->assertSame($decoded->ErrorMessage, "addCatalog - No visibility set for catalog and you don't have global right to create catalog", $response);
+
+        //create child catalog
         $childCatalogNoVisibility = Utils::catalog(uniqid("newchildcatalog"), []);
         unset($childCatalogNoVisibility['visibility']);
         $response = Utils::httpPost("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibilityName, json_encode($childCatalogNoVisibility));
         $decoded = json_decode($response);
-        $this->assertSame($decoded->status, "success", $response);
-        //Catalog test
-        //check creation outiside of 'projects' and 'users' catalogs
-        //catalog creation creates collection even without collection right?! type=collection...
+        $this->assertSame($decoded->status, "success", $response); //TODO He is the owner he should be allowed to create a child catalog without visibility, the default visibility should be applied, check if it is the case and return error if not
     }
 
     public function testCanUpdateCatalog(): void
@@ -77,11 +88,21 @@ final class CatalogsTest extends TestCase
 
         $response = Utils::httpPut("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibility['id'], json_encode($catalogNoVisibility));
         $decoded = json_decode($response);
+
+        //si list /projects show catalog without visibility -> à corriger
+        $response = Utils::httpGet("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects/");
+        $decoded = json_decode($response);
+        //TODO need to chack that links does not caontains element with "rel":"child" as this would mean that the user can see private catalogs
+        $this->assertArrayHasKey( "rel", $decoded->links, $response);
+       
+
         //TODO: shouldn't this be a 404 because the user without rights shouldn't even see the catalog?
         $this->assertSame($decoded->ErrorMessage, "updateCatalog - Insufficient rights to update a catalog", $response);
     }
 
-    public function testCanDeleteCatalog(): void {
+    // #[Group('only')]
+    public function testCanDeleteCatalog(): void
+    {
         $utils = new Utils();
         $userHasCatalogRight = uniqid("userwithcatalogright");
         $utils->createAPIUser($userHasCatalogRight);
@@ -94,7 +115,7 @@ final class CatalogsTest extends TestCase
         $utils->createCatalogAPI($userHasCatalogRight, $catalogNoVisibility);
 
         $response = Utils::httpDelete("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibility['id']);
-        $decoded = json_decode($response); 
+        $decoded = json_decode($response);
         //TODO: shouldn't this be a 404 because the user without rights shouldn't even see the catalog?
         $this->assertSame($decoded->ErrorCode, 403, $response);
 

@@ -626,7 +626,6 @@ class CollectionsAPI
          * Load collection
          */
         $collection = $this->context->keeper->getRestoCollection($params['collectionId'], $this->user)->load();
-
         if (!$this->user->hasRightsTo(RestoUser::CREATE_ITEM, array('collection' => $collection))) {
             if (empty($collection->visibility)) {
                 RestoLogUtil::httpError(403);
@@ -641,6 +640,21 @@ class CollectionsAPI
             }
             if (!$can) {
                 RestoLogUtil::httpError(403);
+            }
+        }
+        error_log('insertFeatures raw body: ' . json_encode($body));
+        /*
+         * Convert visibility from names to ids
+         */
+        if (isset($body['properties']['visibility'])) {
+            if (empty($body['properties']['visibility'])) {
+                RestoLogUtil::httpError(400, 'Visibility is set but either emtpy or referencing an unknown group');
+            }
+            if (!$this->context->core['anyoneCanSwitchVisibilityToPublic'] && in_array(RestoConstants::GROUP_DEFAULT_ID, $body['properties']['visibility'])) {
+                $isAdmin = $this->user->hasGroup(RestoConstants::GROUP_ADMIN_ID);
+                if (!$isAdmin) {
+                    RestoLogUtil::httpError(403, 'You are not allowed to set the visibility of the default group');
+                }
             }
         }
 
