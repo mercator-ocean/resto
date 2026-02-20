@@ -95,7 +95,6 @@ final class ItemsTest extends TestCase
     }
 
 
-    #[Group('only')]
     public function testCanDeleteItem(): void
     {
         $utils = new Utils();

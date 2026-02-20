@@ -7,7 +7,6 @@ use PHPUnit\Framework\Attributes\Group;
 
 final class CatalogsTest extends TestCase
 {
-
     public function testCanCreateCatalog(): void
     {
         //Create  catalog with group right
@@ -25,10 +24,12 @@ final class CatalogsTest extends TestCase
         $catalogNoVisibility = Utils::catalog($catalogNoVisibilityName, []);
         unset($catalogNoVisibility['visibility']);
 
+        $catalogVisibility = Utils::catalog(uniqid("newcatalog"), [$userHasCatalogRight]);
+
         //not allowed to create catalog outside of /projects and /users
-        $response = Utils::httpPost("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs", json_encode($catalogNoVisibility));
+        $response = Utils::httpPost("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs", json_encode($catalogVisibility));
         $decoded = json_decode($response);
-        $this->assertSame($decoded->ErrorMessage, "addCatalog - No visibility set for catalog and you don't have global right to create catalog", $response); //TODO is this the right error ?
+        $this->assertSame($decoded->ErrorMessage, "addCatalog - Forbidden", $response);
 
         //Create catalog without visibility under /projects with user with right to create catalog, the default visibility should be applied, in this case the user private group   
         $utils->createCatalogAPI($userHasCatalogRight, $catalogNoVisibility);
@@ -59,7 +60,6 @@ final class CatalogsTest extends TestCase
         $response = Utils::httpPut("http://" . $userHasCatalogRight . ":dummy@localhost:5252/users/" . $userHasCatalogRight . "/rights/catalogs/", json_encode($createCatalogRight));
         $decoded = json_decode($response);
         $this->assertSame($decoded->status, "success", $response);
-        //TODO He is the owner he should be allowed to create a child catalog without visibility, the default visibility should be applied, check if it is the case and return error if not
 
         $catalogNoVisibility['links'] = [[
             "rel" => "child",
@@ -76,6 +76,7 @@ final class CatalogsTest extends TestCase
         $this->assertStringContainsString($childCatalogNoVisibility['id'], $decoded->links[3]->href, $response);
     }
 
+    #[Group('only')]
     public function testCanUpdateCatalog(): void
     {
         $utils = new Utils();
@@ -106,17 +107,19 @@ final class CatalogsTest extends TestCase
 
         $response = Utils::httpPut("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibility['id'], json_encode($catalogNoVisibility));
         $decoded = json_decode($response);
-        //TODO: shouldn't this be a 404 because the user without rights shouldn't even see the catalog?
         $this->assertSame($decoded->ErrorMessage, "updateCatalog - Insufficient rights to update a catalog", $response);
-
 
         //si list /projects show catalog without visibility -> à corriger
         $response = Utils::httpGet("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects/");
         $decoded = json_decode($response);
+        print_r($response);
         //TODO would mean that the user can see private catalogs
-        foreach ($decoded->links as $link) {
-            $this->assertNotSame($link->rel, "child", $link->rel);
-        }
+        $children= array_filter(array_map(function($link) {
+            return $link->rel;
+        }, $decoded->links), function($rel) {
+            return $rel === "child";
+        });
+        $this->assertCount(1, $children, $response);
     }
 
     // #[Group('only')]
@@ -135,7 +138,6 @@ final class CatalogsTest extends TestCase
 
         $response = Utils::httpDelete("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibility['id']);
         $decoded = json_decode($response);
-        //TODO: shouldn't this be a 404 because the user without rights shouldn't even see the catalog?
         $this->assertSame($decoded->ErrorCode, 403, $response);
 
         $response = Utils::httpDelete("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibility['id']);

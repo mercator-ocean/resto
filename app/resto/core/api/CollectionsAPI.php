@@ -642,7 +642,6 @@ class CollectionsAPI
                 RestoLogUtil::httpError(403);
             }
         }
-        error_log('insertFeatures raw body: ' . json_encode($body));
         /*
          * Convert visibility from names to ids
          */

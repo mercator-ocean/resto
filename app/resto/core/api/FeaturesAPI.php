@@ -690,14 +690,12 @@ class FeaturesAPI
         if (!$feature->isValid()) {
             RestoLogUtil::httpError(404);
         }
-        error_log("updateFeature " . json_encode($body));
 
         if ($this->user->hasRightsTo(RestoUser::UPDATE_ITEM, array('item' => $feature))) {
             // Specifically set splitGeometry
             $params['_splitGeom'] = isset($params['_splitGeom']) && filter_var($params['_splitGeom'], FILTER_VALIDATE_BOOLEAN) === false ? false : $this->context->core["splitGeometryOnDateLine"];
             return $collection->model->updateFeature($feature, $collection, $body, $params);
         }
-        error_log("updateFeature " . json_encode($body));
         if (isset($body['properties']['visibility'])) {
             RestoLogUtil::httpError(403, 'Forbidden to update item visibility');
         }

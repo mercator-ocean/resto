@@ -394,7 +394,6 @@ class STACAPI
         /*
          * First check that user has the right to create a catalog
          */
-        error_log("addCatalog Check that user has the right to create a catalog");
         if (!$this->user->hasRightsTo(RestoUser::CREATE_CATALOG, array('catalog' => $body))) {
             if (empty($body['visibility'])) {
                 RestoLogUtil::httpError(403, "No visibility set for catalog and you don't have global right to create catalog");
