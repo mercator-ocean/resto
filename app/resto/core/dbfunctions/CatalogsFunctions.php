@@ -673,11 +673,14 @@ class CatalogsFunctions
         }
         if ( !isset($catalog['visibility']) ) {
             $createdCatalogIsPublic = isset($user->profile['settings']['createdCatalogIsPublic']) ? $user->profile['settings']['createdCatalogIsPublic'] : true;
+            if (!$this->context->core['anyoneCanSwitchVisibilityToPublic']) {
+             $createdCatalogIsPublic=false;
+            }
             // Always private by default under users/
             if ( isset($catalog['id']) && strpos($catalog['id'], 'users/') === 0 ) {
                 $createdCatalogIsPublic = false;
             }
-            $catalog['visibility'] = RestoUtil::getDefaultVisibility($user, $createdCatalogIsPublic, $this->context->core['anyoneCanSwitchVisibilityToPublic']);
+            $catalog['visibility'] = RestoUtil::getDefaultVisibility($user, $createdCatalogIsPublic);
         }
         $insert = '(id, title, description, level, counters, owner, visibility, rtype, properties, stac_url, pinned, created) SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now()';
         $values = array(

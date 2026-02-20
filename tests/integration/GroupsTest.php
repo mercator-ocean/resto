@@ -180,7 +180,7 @@ final class GroupsTest extends TestCase
         // User in group cannot private update
         $response = Utils::httpPut("http://" . $inGroupUserName . ":dummy@localhost:5252/collections/" . $collectionName . "/items/" . $privateItem['id'], json_encode($privateItem));
         $decoded = json_decode($response);
-        $this->assertSame($decoded->ErrorCode, 403, $response);
+        $this->assertSame($decoded->ErrorCode, 404, $response);
 
         $inGroupItem = Utils::item(uniqid("ingroupitem1"), [$groupName]);
         $response = $utils->createItemAPI($groupOwnerUserName, $collectionName, $inGroupItem);

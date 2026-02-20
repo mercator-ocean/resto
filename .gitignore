@@ -15,3 +15,5 @@ _docker-compose*.yml
 backup/*
 tests/vendor
 .php-cs-fixer.dist.php
+.vscode
+.phpunit.result.cache

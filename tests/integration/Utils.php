@@ -235,7 +235,6 @@ final class Utils extends Assert
     public static function rights(): array
     {
         return [
-
             "createCollection" => false,
             "deleteAnyCollection" => false,
             "updateAnyCollection" => false,
@@ -247,7 +246,6 @@ final class Utils extends Assert
             "createAnyFeature" => false,
             "deleteAnyFeature" => false,
             "updateAnyFeature" => false,
-            "catalogs" => "{}",
         ];
     }
 }

@@ -7,6 +7,7 @@ use PHPUnit\Framework\Attributes\Group;
 
 final class CatalogsTest extends TestCase
 {
+
     public function testCanCreateCatalog(): void
     {
         //Create  catalog with group right
@@ -35,15 +36,15 @@ final class CatalogsTest extends TestCase
         $decoded = json_decode($response);
         $this->assertSame($decoded->title, $catalogNoVisibility['title'], $response);
 
-        //Create catalog with default visibility, should return error because the user doesn't have the right to set default visibility
-        $response = Utils::httpPost("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs/projects", json_encode($catalogDefaultVisibility));
-        $decoded = json_decode($response);
-        $this->assertSame($decoded->ErrorMessage, "addCatalog - You are not allowed to set the visibility of the default group", $response);
-
         //not allowed to get private catalog if you don't have the right to see it
         $response = Utils::httpGet("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibilityName);
         $decoded = json_decode($response);
         $this->assertSame($decoded->ErrorMessage, "processPath - You are not allowed to access this catalog", $response);
+
+        //Create catalog with default visibility, should return error because the user doesn't have the right to set default visibility
+        $response = Utils::httpPost("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs/projects", json_encode($catalogDefaultVisibility));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->ErrorMessage, "addCatalog - You are not allowed to set the visibility of the default group", $response);
 
         //not allowed to create catalog without visibility if you don't have the right to create catalog
         $response = Utils::httpPost("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects", json_encode($catalogNoVisibility));
@@ -53,9 +54,26 @@ final class CatalogsTest extends TestCase
         //create child catalog
         $childCatalogNoVisibility = Utils::catalog(uniqid("newchildcatalog"), []);
         unset($childCatalogNoVisibility['visibility']);
-        $response = Utils::httpPost("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibilityName, json_encode($childCatalogNoVisibility));
+
+        $createCatalogRight = ["projects/" . $catalogNoVisibility['id'] => ["createCatalog" => true]];
+        $response = Utils::httpPut("http://" . $userHasCatalogRight . ":dummy@localhost:5252/users/" . $userHasCatalogRight . "/rights/catalogs/", json_encode($createCatalogRight));
         $decoded = json_decode($response);
-        $this->assertSame($decoded->status, "success", $response); //TODO He is the owner he should be allowed to create a child catalog without visibility, the default visibility should be applied, check if it is the case and return error if not
+        $this->assertSame($decoded->status, "success", $response);
+        //TODO He is the owner he should be allowed to create a child catalog without visibility, the default visibility should be applied, check if it is the case and return error if not
+
+        $catalogNoVisibility['links'] = [[
+            "rel" => "child",
+            "type" => "application/json",
+            "href" => "http://127.0.0.1:5252/catalogs/projects/" . $childCatalogNoVisibility['id']
+        ]];
+        $response = Utils::httpPost("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibility['id'], json_encode($childCatalogNoVisibility));
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->status, "success", $response);
+
+        $response = Utils::httpGet("http://" . $userHasCatalogRight . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibility['id']);
+        $decoded = json_decode($response);
+        $this->assertSame($decoded->links[3]->rel, "child", $response);
+        $this->assertStringContainsString($childCatalogNoVisibility['id'], $decoded->links[3]->href, $response);
     }
 
     public function testCanUpdateCatalog(): void
@@ -88,16 +106,17 @@ final class CatalogsTest extends TestCase
 
         $response = Utils::httpPut("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibility['id'], json_encode($catalogNoVisibility));
         $decoded = json_decode($response);
+        //TODO: shouldn't this be a 404 because the user without rights shouldn't even see the catalog?
+        $this->assertSame($decoded->ErrorMessage, "updateCatalog - Insufficient rights to update a catalog", $response);
+
 
         //si list /projects show catalog without visibility -> à corriger
         $response = Utils::httpGet("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects/");
         $decoded = json_decode($response);
-        //TODO need to chack that links does not caontains element with "rel":"child" as this would mean that the user can see private catalogs
-        $this->assertArrayHasKey( "rel", $decoded->links, $response);
-       
-
-        //TODO: shouldn't this be a 404 because the user without rights shouldn't even see the catalog?
-        $this->assertSame($decoded->ErrorMessage, "updateCatalog - Insufficient rights to update a catalog", $response);
+        //TODO would mean that the user can see private catalogs
+        foreach ($decoded->links as $link) {
+            $this->assertNotSame($link->rel, "child", $link->rel);
+        }
     }
 
     // #[Group('only')]
