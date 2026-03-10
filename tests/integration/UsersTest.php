@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
+
 
 final class UsersTest extends TestCase
 {
@@ -49,6 +51,7 @@ final class UsersTest extends TestCase
         $this->assertSame($decoded->username, $userName, $response);
     }
 
+    #[Group('only')]
     public function testCanGetOtherUserProfile(): void
     {
         $utils = new Utils();
@@ -62,6 +65,7 @@ final class UsersTest extends TestCase
         $response = Utils::httpGet("http://" . $activeUserName . ":" . "dummy@localhost:5252/users/" . $passiveUserName);
         $decoded = json_decode($response);
         $this->assertSame($decoded->username, $passiveUserName, $response);
+        $this->assertNotSame($decoded->firstname, "John", $response);
     }
 
     public function testCanAuthenticateThroughToken(): void

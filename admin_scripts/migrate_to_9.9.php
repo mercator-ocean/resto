@@ -20,7 +20,7 @@ try {
     $dbDriver->query('BEGIN');
 
     /* User information is now false by default */
-    $dbDriver->query('ALTER TABLE ' . $dbDriver->commonSchema . '.user ALTER COLUMN settings SET DEFAULT \'{"showBio":false,"showIdentity":false,"showTopics":false,"showEmail":false}\'');
+    $dbDriver->query('UPDATE ' . $dbDriver->commonSchema . '.user SET settings = \'{"showBio":false,"showIdentity":false,"showTopics":false,"showEmail":false}\'');
 
     $dbDriver->query('COMMIT');
 } catch (Exception $e) {

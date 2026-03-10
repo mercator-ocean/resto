@@ -76,7 +76,6 @@ final class CatalogsTest extends TestCase
         $this->assertStringContainsString($childCatalogNoVisibility['id'], $decoded->links[3]->href, $response);
     }
 
-    #[Group('only')]
     public function testCanUpdateCatalog(): void
     {
         $utils = new Utils();
