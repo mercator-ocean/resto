@@ -31,7 +31,7 @@ final class GroupsTest extends TestCase
     }
 
 
-    public function testCanPlayWithGroupRightCreation(): void
+    public function testCanPlayWithGroupRightCreate(): void
     {
         $utils = new Utils();
 

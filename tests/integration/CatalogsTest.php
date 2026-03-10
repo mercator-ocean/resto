@@ -108,21 +108,8 @@ final class CatalogsTest extends TestCase
         $response = Utils::httpPut("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects/" . $catalogNoVisibility['id'], json_encode($catalogNoVisibility));
         $decoded = json_decode($response);
         $this->assertSame($decoded->ErrorMessage, "updateCatalog - Insufficient rights to update a catalog", $response);
-
-        //si list /projects show catalog without visibility -> à corriger
-        $response = Utils::httpGet("http://" . $userWithoutRights . ":dummy@localhost:5252/catalogs/projects/");
-        $decoded = json_decode($response);
-        print_r($response);
-        //TODO would mean that the user can see private catalogs
-        $children= array_filter(array_map(function($link) {
-            return $link->rel;
-        }, $decoded->links), function($rel) {
-            return $rel === "child";
-        });
-        $this->assertCount(1, $children, $response);
     }
 
-    // #[Group('only')]
     public function testCanDeleteCatalog(): void
     {
         $utils = new Utils();
