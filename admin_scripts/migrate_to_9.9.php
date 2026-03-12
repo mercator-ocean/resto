@@ -20,7 +20,9 @@ try {
     $dbDriver->query('BEGIN');
 
     /* User information is now false by default */
-    $dbDriver->query('UPDATE ' . $dbDriver->commonSchema . '.user SET settings = \'{"showBio":false,"showIdentity":false,"showTopics":false,"showEmail":false}\'');
+    $dbDriver->query('ALTER TABLE ' . $dbDriver->commonSchema . '.user ALTER COLUMN settings SET DEFAULT \'{"createdCatalogIsPublic":true,"createdCollectionIsPublic":true,"createdItemIsPublic":true,"notifyOnAddFeature":true,"notifyOnNewFollower":true,"notifyOnLikeFeature":true,"notifyOnAddComment":true,"showBio":false,"showIdentity":false,"showTopics":false,"showEmail":false,"profileNeedReview":true}\'');
+    
+    $dbDriver->query('UPDATE ' . $dbDriver->commonSchema . '.user SET settings = settings::jsonb || jsonb \'{"showBio":false,"showIdentity":false,"showTopics":false,"showEmail":false}\'');
 
     $dbDriver->query('COMMIT');
 } catch (Exception $e) {

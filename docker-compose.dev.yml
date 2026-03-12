@@ -11,6 +11,7 @@ services:
       - ./app/resto/core:/app/resto/core:ro
       - ./app/vendor:/app/vendor:ro
       - ./build/resto/container_root/cont-init.d/:/etc/cont-init.d/:ro
+      - ./admin_scripts:/admin_scripts:ro
   restodb:
     restart: no
     ports:

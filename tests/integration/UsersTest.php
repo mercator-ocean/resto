@@ -65,7 +65,7 @@ final class UsersTest extends TestCase
         $response = Utils::httpGet("http://" . $activeUserName . ":" . "dummy@localhost:5252/users/" . $passiveUserName);
         $decoded = json_decode($response);
         $this->assertSame($decoded->username, $passiveUserName, $response);
-        $this->assertNotSame($decoded->firstname, "John", $response);
+        $this->assertArrayNotHasKey('firstname', array($decoded), $response);
     }
 
     public function testCanAuthenticateThroughToken(): void
