@@ -24,4 +24,7 @@ UPDATE resto.catalog_feature SET path=text2ltree(replace(catalogid, '/', '.'));
 
 UPDATE resto.catalog SET id='projects/'||id WHERE rtype IS NULL OR rtype = 'catalog' AND id NOT LIKE 'variable_families/%'; 
 
+ALTER TABLE resto.user ALTER COLUMN settings SET DEFAULT '{"createdCatalogIsPublic":true,"createdCollectionIsPublic":true,"createdItemIsPublic":true,"notifyOnAddFeature":true,"notifyOnNewFollower":true,"notifyOnLikeFeature":true,"notifyOnAddComment":true,"showBio":false,"showIdentity":false,"showTopics":false,"showEmail":false,"profileNeedReview":true}';
+UPDATE resto.user SET settings = settings::jsonb || jsonb '{"showBio":false,"showIdentity":false,"showTopics":false,"showEmail":false}';
+
 SQL
