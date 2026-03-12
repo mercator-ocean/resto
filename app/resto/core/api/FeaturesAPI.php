@@ -834,7 +834,7 @@ class FeaturesAPI
                 if (!$this->context->core['anyoneCanSwitchVisibilityToPublic'] && in_array(RestoConstants::GROUP_DEFAULT_ID, $body['visibility'])) {
                     $isAdmin = $this->user->hasGroup(RestoConstants::GROUP_ADMIN_ID);
                     if (!$isAdmin) {
-                        RestoLogUtil::httpError(403, 'You are not allowed to set the visibility of the default group');
+                        RestoLogUtil::httpError(403, 'You are not allowed to change the visibility of this feature to default');
                     }
                 }
             }
