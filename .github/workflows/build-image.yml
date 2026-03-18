@@ -2,7 +2,8 @@ name: resto image builder
 
 env:
   IMAGE: resto
-  NAME: jjrom
+  REGISTRY: ghcr.io
+  REGISTRY_ORG: mercator-ocean
   REPO: resto
 
 on:
@@ -34,14 +35,18 @@ jobs:
     - name: Print values of all environment variables
       run: printenv
     
-    - name: Login to DockerHub Registry
-      run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Build and Push Image
       if: ${{ startsWith(github.ref, 'refs/heads/master') && github.event_name != 'release' }}
       run: |
 
-        docker buildx build --push --platform linux/amd64,linux/arm64 --tag ${NAME}/${IMAGE}:latest --file ./build/resto/Dockerfile .
+        docker buildx build --push --platform linux/amd64,linux/arm64 --tag ${{ env.REGISTRY }}/${{ env.REGISTRY_ORG }}/${{ env.IMAGE }}:latest --file ./build/resto/Dockerfile .
         
     - name: Tag latest release and push to repository
       if: ${{ github.event_name == 'release' }}
@@ -50,6 +55,4 @@ jobs:
         # Get latest release tag
         tag=$(git describe --tags --abbrev=0 | sed s/^v//)
         
-        docker buildx build --push --platform linux/amd64,linux/arm64 -t ${NAME}/${IMAGE}:latest -t ${NAME}/${IMAGE}:$tag --file ./build/resto/Dockerfile .
-      
-      
+        docker buildx build --push --platform linux/amd64,linux/arm64 -t ${{ env.REGISTRY }}/${{ env.REGISTRY_ORG }}/${{ env.IMAGE }}:latest -t ${{ env.REGISTRY }}/${{ env.REGISTRY_ORG }}/${{ env.IMAGE }}:$tag --file ./build/resto/Dockerfile .
