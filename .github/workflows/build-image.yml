@@ -2,7 +2,7 @@ name: resto image builder
 
 env:
   IMAGE: mercator-resto
-  REGISTRY: nexus.mercator-ocean.fr/repository
+  REGISTRY: nexus.mercator-ocean.fr
   REGISTRY_ORG: moi-docker
   REPO: resto
 
@@ -47,7 +47,7 @@ jobs:
       if: ${{ (startsWith(github.ref, 'refs/heads/master') || startsWith(github.ref, 'refs/heads/ft-')) && github.event_name != 'release' }}
       run: |
 
-        docker buildx build --push --platform linux/amd64,linux/arm64 --tag ${{ env.REGISTRY }}/${{ env.REGISTRY_ORG }}/${{ env.IMAGE }}:latest --file ./build/resto/Dockerfile .
+        docker buildx build --push --platform linux/amd64,linux/arm64 --provenance=false --tag ${{ env.REGISTRY }}/${{ env.REGISTRY_ORG }}/${{ env.IMAGE }}:latest --file ./build/resto/Dockerfile .
         
     - name: Tag latest release and push to repository
       if: ${{ github.event_name == 'release' }}
@@ -56,4 +56,4 @@ jobs:
         # Get latest release tag
         tag=$(git describe --tags --abbrev=0 | sed s/^v//)
         
-        docker buildx build --push --platform linux/amd64,linux/arm64 -t ${{ env.REGISTRY }}/${{ env.REGISTRY_ORG }}/${{ env.IMAGE }}:latest -t ${{ env.REGISTRY }}/${{ env.REGISTRY_ORG }}/${{ env.IMAGE }}:$tag --file ./build/resto/Dockerfile .
+        docker buildx build --push --platform linux/amd64,linux/arm64 --provenance=false -t ${{ env.REGISTRY }}/${{ env.REGISTRY_ORG }}/${{ env.IMAGE }}:latest -t ${{ env.REGISTRY }}/${{ env.REGISTRY_ORG }}/${{ env.IMAGE }}:$tag --file ./build/resto/Dockerfile .
