@@ -2,7 +2,7 @@ name: resto image builder
 
 env:
   IMAGE: mercator-resto
-  REGISTRY: nexus.mercator-ocean.fr
+  REGISTRY: nexus.mercator-ocean.fr/repository
   REGISTRY_ORG: moi-docker
   REPO: resto
 
