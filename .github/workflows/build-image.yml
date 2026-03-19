@@ -1,9 +1,9 @@
 name: resto image builder
 
 env:
-  IMAGE: resto
+  IMAGE: mercator-resto
   REGISTRY: nexus.mercator-ocean.fr
-  REGISTRY_ORG: moi-docker/mercator-resto
+  REGISTRY_ORG: moi-docker
   REPO: resto
 
 on:
@@ -22,9 +22,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
     # defaults to shallow checkout
