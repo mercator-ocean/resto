@@ -44,7 +44,7 @@ jobs:
         password: ${{ secrets.NEXUS_PASSWORD }}
     
     - name: Build and Push Image
-      if: ${{ startsWith(github.ref, 'refs/heads/master') && github.event_name != 'release' }}
+      if: ${{ (startsWith(github.ref, 'refs/heads/master') || startsWith(github.ref, 'refs/heads/ft-')) && github.event_name != 'release' }}
       run: |
 
         docker buildx build --push --platform linux/amd64,linux/arm64 --tag ${{ env.REGISTRY }}/${{ env.REGISTRY_ORG }}/${{ env.IMAGE }}:latest --file ./build/resto/Dockerfile .
